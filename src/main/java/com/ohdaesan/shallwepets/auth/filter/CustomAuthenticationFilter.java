@@ -47,14 +47,14 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
      *
      * @param request - httpServletRequest
      * @return UserPasswordAuthenticationToken
-     * @throw Excpetion e
+     * @throws IOException e
      * */
     private UsernamePasswordAuthenticationToken getAuthRequest(HttpServletRequest request) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-
         objectMapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE,true);
-        MemberDTO member = objectMapper.readValue(request.getInputStream(), MemberDTO.class);
 
-        return new UsernamePasswordAuthenticationToken(member.getMemberId(), member.getMemberPwd());
+        MemberDTO memberDTO = objectMapper.readValue(request.getInputStream(), MemberDTO.class);
+
+        return new UsernamePasswordAuthenticationToken(memberDTO.getMemberId(), memberDTO.getMemberPwd());
     }
 }
