@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -39,5 +41,17 @@ public class MemberService {
         MemberDTO responseMemberDTO = modelMapper.map(savedMember, MemberDTO.class);
 
         return responseMemberDTO;
+    }
+
+    public String findMemberIdByMemberNameAndMemberEmail(String name, String email) {
+        Member member = memberRepository.findMemberByMemberNameAndMemberEmail(name, email)
+                .orElseThrow(() -> new NoSuchElementException("No member found with the provided name and email"));
+        return member.getMemberId();
+    }
+
+    public String findMemberIdByMemberNameAndMemberPhone(String name, String phone) {
+        Member member = memberRepository.findMemberByMemberNameAndMemberPhone(name, phone)
+                .orElseThrow(() -> new NoSuchElementException("No member found with the provided name and phone"));
+        return member.getMemberId();
     }
 }
