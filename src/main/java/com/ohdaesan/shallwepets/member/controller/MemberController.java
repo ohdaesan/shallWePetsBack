@@ -10,6 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
 @Tag(name = "Member")
 @RestController
 @RequiredArgsConstructor
@@ -35,5 +39,39 @@ public class MemberController {
     @PostMapping("/login")
     @CrossOrigin(origins = "http://localhost:3000")
     public void login(@RequestBody MemberDTO memberDTO) {
+    }
+
+    @PostMapping("/findId")
+    @ResponseBody
+//    public ResponseEntity<Map<String, String>> findId(@RequestParam(required = false) String name1,
+//                                                      @RequestParam(required = false) String name2,
+//                                                      @RequestParam(required = false) String email,
+//                                                      @RequestParam(required = false) String phone,
+//                                                      @RequestParam String searchBy) {
+    ResponseEntity<Map<String, String>> findId(@RequestBody Map<String, String> params) {
+        Map<String, String> response = new HashMap<>();
+
+        try {
+            String searchBy = params.get("searchBy");
+
+            String memberId = "";
+
+            if ("email".equals(searchBy)) {
+                String name2 = params.get("name2");
+                String email = params.get("email");
+                memberId = memberService.findMemberIdByMemberNameAndMemberEmail(name2, email);
+            } else if ("phone".equals(searchBy)){
+                String name1 = params.get("name1");
+                String phone = params.get("phone");
+                memberId = memberService.findMemberIdByMemberNameAndMemberPhone(name1, phone);
+            }
+
+            response.put("memberId", memberId);
+
+            return ResponseEntity.ok(response);
+        } catch (NoSuchElementException e) {
+            response.put("error", "아이디를 찾을 수 없습니다.\n입력하신 정보를 다시 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 }

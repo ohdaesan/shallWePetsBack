@@ -94,6 +94,17 @@ public class WebSecurityConfig {
 //                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/member/register").anonymous()    // 회원가입은 비인증 사용자만 접근
                         .requestMatchers("/member/login").anonymous()
+                        .requestMatchers("/sendMail").permitAll()
+                        .requestMatchers("/checkMail").permitAll()
+//                        .requestMatchers("/member/checkid").anonymous()
+//                        .requestMatchers("/member/checknickname").anonymous()
+//                        .requestMatchers("/member/checkuser").anonymous()
+//                        .requestMatchers("/member/checkstatus").anonymous()
+                        .requestMatchers("/member/findId").anonymous()
+//                        .requestMatchers("/member/findPw").anonymous()
+//                        .requestMatchers("/member/changePwNotLoggedIn").anonymous()
+//                        .requestMatchers("/post/postList","/post/detailPost/**").permitAll()
+//                        .requestMatchers("/post/createPost","/post/modifyPost/**","/post/delete/**").authenticated()
                         .anyRequest()
                         .authenticated()    // 나머지 요청은 인증 필요
                 );

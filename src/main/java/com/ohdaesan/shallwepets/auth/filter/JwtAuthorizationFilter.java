@@ -51,6 +51,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         List<String> roleLessList = Arrays.asList(
                 "/member/login",
                 "/member/register",          // 회원가입 시 토큰이 없어도 요청 가능하게
+                "/member/findId",
+//                "/member/findPwd",
+                "/sendMail",
+                "/checkMail",
                 "/swagger-ui/(.*)",          // swagger 설정
                 "/swagger-ui/index.html",    // swagger 설정
                 "/v3/api-docs",              // swagger 설정
