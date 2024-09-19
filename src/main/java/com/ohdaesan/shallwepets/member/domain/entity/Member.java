@@ -30,7 +30,9 @@ public class Member {
     private String memberAddress;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
-    private String grade;
+
+    @Enumerated(EnumType.STRING)
+    private Grade grade = Grade.치와와;
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.ACTIVATED;
