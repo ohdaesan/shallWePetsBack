@@ -62,4 +62,25 @@ public class MemberService {
     public boolean existsByMemberIdAndMemberNameAndMemberPhone(String memberId, String name, String phone) {
         return memberRepository.existsByMemberIdAndMemberNameAndMemberPhone(memberId, name, phone);
     }
+
+    public boolean isPasswordInUse(String memberId, String rawPassword) {
+        Member member = memberRepository.findByMemberId(memberId);
+
+        if (member == null) {
+            return false;
+        }
+
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+        return passwordEncoder.matches(rawPassword, member.getMemberPwd());
+    }
+
+    public void updatePassword(String memberId, String modifiedPw) {
+        String encodedPassword = passwordEncoder.encode(modifiedPw);
+        int updatedCount = memberRepository.updateMemberPwByMemberId(memberId, encodedPassword);
+
+        // 업데이트가 실행 안되었을 때
+        if (updatedCount == 0) {
+            throw new NoSuchElementException("존재하지 않는 회원입니다.");
+        }
+    }
 }

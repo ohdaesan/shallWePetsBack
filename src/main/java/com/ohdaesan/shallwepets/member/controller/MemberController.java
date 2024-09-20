@@ -99,4 +99,39 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
+
+    @PostMapping("/changePwdNotLoggedIn")
+    public ResponseEntity<Map<String, String>> changePwNotLoggedIn(@RequestBody Map<String, String> params) {
+        Map<String, String> response = new HashMap<>();
+
+        String memberId = params.get("memberId");
+        String modifiedPw = params.get("modifiedPw");
+        String modifiedPwConfirm = params.get("modifiedPwConfirm");
+
+        // 서버사이드에서도 확인
+        if (modifiedPw == null || modifiedPwConfirm == null || !modifiedPw.equals(modifiedPwConfirm)) {
+            response.put("error", "비밀번호와 비밀번호 확인이 서로 일치하지 않습니다.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        String regexPw = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$";
+        if (!modifiedPw.matches(regexPw)) {
+            response.put("error", "비밀번호는 최소 8자 이상이어야 하며, 적어도 하나의 문자, 숫자 및 특수 문자를 포함해야 합니다.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        if (memberService.isPasswordInUse(memberId, modifiedPw)) {
+            response.put("error", "기존과 같은 비밀번호는 사용하실 수 없습니다.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            memberService.updatePassword(memberId, modifiedPw);
+            response.put("success", "비밀번호가 성공적으로 변경되었습니다.");
+        } catch (NoSuchElementException e) {
+            response.put("error", "존재하지 않는 회원입니다.");
+        }
+
+        return ResponseEntity.ok(response);
+    }
 }
