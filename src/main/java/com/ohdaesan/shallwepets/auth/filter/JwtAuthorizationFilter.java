@@ -52,7 +52,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/member/login",
                 "/member/register",          // 회원가입 시 토큰이 없어도 요청 가능하게
                 "/member/findId",
-//                "/member/findPwd",
+                "/member/findPwd",
                 "/sendMail",
                 "/checkMail",
                 "/swagger-ui/(.*)",          // swagger 설정

@@ -101,7 +101,7 @@ public class WebSecurityConfig {
 //                        .requestMatchers("/member/checkuser").anonymous()
 //                        .requestMatchers("/member/checkstatus").anonymous()
                         .requestMatchers("/member/findId").anonymous()
-//                        .requestMatchers("/member/findPw").anonymous()
+                        .requestMatchers("/member/findPwd").anonymous()
 //                        .requestMatchers("/member/changePwNotLoggedIn").anonymous()
 //                        .requestMatchers("/post/postList","/post/detailPost/**").permitAll()
 //                        .requestMatchers("/post/createPost","/post/modifyPost/**","/post/delete/**").authenticated()

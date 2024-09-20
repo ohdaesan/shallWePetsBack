@@ -43,12 +43,7 @@ public class MemberController {
 
     @PostMapping("/findId")
     @ResponseBody
-//    public ResponseEntity<Map<String, String>> findId(@RequestParam(required = false) String name1,
-//                                                      @RequestParam(required = false) String name2,
-//                                                      @RequestParam(required = false) String email,
-//                                                      @RequestParam(required = false) String phone,
-//                                                      @RequestParam String searchBy) {
-    ResponseEntity<Map<String, String>> findId(@RequestBody Map<String, String> params) {
+    public ResponseEntity<Map<String, String>> findId(@RequestBody Map<String, String> params) {
         Map<String, String> response = new HashMap<>();
 
         try {
@@ -71,6 +66,36 @@ public class MemberController {
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             response.put("error", "아이디를 찾을 수 없습니다.\n입력하신 정보를 다시 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+
+    @PostMapping("/findPwd")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> findPwd(@RequestBody Map<String, String> params) {
+        Map<String, Boolean> response = new HashMap<>();
+
+        try {
+            String searchBy = params.get("searchBy");
+            boolean exists = false;
+
+            if ("email".equals(searchBy)) {
+                String id2 = params.get("id2");
+                String name2 = params.get("name2");
+                String email = params.get("email");
+                exists = memberService.existsByMemberIdAndMemberNameAndMemberEmail(id2, name2, email);
+            } else if ("phone".equals(searchBy)){
+                String id1 = params.get("id1");
+                String name1 = params.get("name1");
+                String phone = params.get("phone");
+                exists = memberService.existsByMemberIdAndMemberNameAndMemberPhone(id1, name1, phone);
+            }
+
+            response.put("exists", exists);
+
+            return ResponseEntity.ok(response);
+        } catch (NoSuchElementException e) {
+            response.put("error", false);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
