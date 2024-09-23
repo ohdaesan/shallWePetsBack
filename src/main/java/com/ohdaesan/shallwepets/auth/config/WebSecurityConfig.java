@@ -106,6 +106,10 @@ public class WebSecurityConfig {
                         .requestMatchers("/member/changePwdNotLoggedIn").anonymous()
 //                        .requestMatchers("/post/postList","/post/detailPost/**").permitAll()
 //                        .requestMatchers("/post/createPost","/post/modifyPost/**","/post/delete/**").authenticated()
+                                .requestMatchers("/review/createReview").permitAll()
+                                .requestMatchers("/review/reviews").permitAll()
+                                .requestMatchers("/review/{reviewNo}").permitAll()
+                                .requestMatchers("/review/{reviewNo}").permitAll()
                         .anyRequest()
                         .authenticated()    // 나머지 요청은 인증 필요
                 );

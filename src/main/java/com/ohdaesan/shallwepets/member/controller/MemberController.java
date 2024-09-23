@@ -1,6 +1,6 @@
 package com.ohdaesan.shallwepets.member.controller;
 
-import com.ohdaesan.shallwepets.auth.common.ResponseDTO;
+import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.service.MemberService;
 import io.swagger.v3.oas.annotations.tags.Tag;

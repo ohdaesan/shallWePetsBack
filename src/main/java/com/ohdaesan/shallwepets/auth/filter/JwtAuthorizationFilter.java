@@ -57,6 +57,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/sendMail",
                 "/checkMail",
                 "/import-csv",
+                "/review/createReview",
+                "/review/reviews",
+                "/review/(.*)",
                 "/swagger-ui/(.*)",          // swagger 설정
                 "/swagger-ui/index.html",    // swagger 설정
                 "/v3/api-docs",              // swagger 설정
