@@ -134,4 +134,35 @@ public class MemberController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/checkId")
+    public ResponseEntity<ResponseDTO> checkMemberId(@RequestParam String memberId) {
+        boolean exists = memberService.existsMemberId(memberId);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok().body(new ResponseDTO(200, "memberId 존재 여부 확인 성공", response));
+    }
+
+    @GetMapping("/checkNickname")
+    public ResponseEntity<ResponseDTO> checkNickname(@RequestParam String memberNickname) {
+        boolean exists = memberService.existsNickname(memberNickname);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok().body(new ResponseDTO(200, "memberNickname 존재 여부 확인 성공", response));
+    }
+
+    @GetMapping("/checkUser")
+    public ResponseEntity<ResponseDTO> checkUser(
+            @RequestParam String memberEmail,
+            @RequestParam String memberPhone) {
+        boolean emailExists = memberService.existsEmail(memberEmail);
+        boolean phoneExists = memberService.existsPhone(memberPhone);
+
+        Map<String, Boolean> response = new HashMap<>();
+
+        response.put("emailExists", emailExists);
+        response.put("phoneExists", phoneExists);
+
+        return ResponseEntity.ok().body(new ResponseDTO(200, "email과 전화번호 이용한 멤버 존재 여부 확인 성공", response));
+    }
 }
