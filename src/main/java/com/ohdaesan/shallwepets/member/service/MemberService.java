@@ -83,4 +83,20 @@ public class MemberService {
             throw new NoSuchElementException("존재하지 않는 회원입니다.");
         }
     }
+
+    public boolean existsMemberId(String memberId) {
+        return memberRepository.existsByMemberId(memberId);
+    }
+
+    public boolean existsNickname(String memberNickname) {
+        return memberRepository.existsByMemberNickname(memberNickname);
+    }
+
+    public boolean existsEmail(String memberEmail) {
+        return memberRepository.existsByMemberEmail(memberEmail);
+    }
+
+    public boolean existsPhone(String memberPhone) {
+        return memberRepository.existsByMemberPhone(memberPhone);
+    }
 }
