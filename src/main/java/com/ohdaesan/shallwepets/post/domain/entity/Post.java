@@ -32,15 +32,15 @@ public class Post {
     private String fcltyNm;
     private String ctgryTwoNm;
     private String ctgryThreeNm;
-    private String ctyprnNm;
+    private String ctyprvnNm;
     private String signguNm;
     private String legalDongNm;
     private String liNm;
     private String lnbrNm;
     private String roadNm;
     private String buldNo;
-    private Double lcLa;
-    private Double lcLo;
+    private String lcLa;
+    private String lcLo;
     private String zipNo;
     private String rdnmadrNm;
     private String lnmAddr;

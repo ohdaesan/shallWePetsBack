@@ -96,6 +96,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/member/login").anonymous()
                         .requestMatchers("/sendMail").permitAll()
                         .requestMatchers("/checkMail").permitAll()
+                        .requestMatchers("/import-csv").permitAll()
 //                        .requestMatchers("/member/checkid").anonymous()
 //                        .requestMatchers("/member/checknickname").anonymous()
 //                        .requestMatchers("/member/checkuser").anonymous()
