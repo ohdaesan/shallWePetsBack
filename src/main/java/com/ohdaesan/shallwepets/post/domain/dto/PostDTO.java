@@ -10,22 +10,18 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 public class PostDTO {
-    private Long postNo;
-    private Long memberNo;
-    private LocalDateTime createdDate;
-    private String status = "AWAITING";
     private String fcltyNm;
     private String ctgryTwoNm;
     private String ctgryThreeNm;
-    private String ctyprnNm;
+    private String ctyprvnNm;
     private String signguNm;
     private String legalDongNm;
     private String liNm;
     private String lnbrNm;
     private String roadNm;
     private String buldNo;
-    private Double lcLa;
-    private Double lcLo;
+    private String lcLa;
+    private String lcLo;
     private String zipNo;
     private String rdnmadrNm;
     private String lnmAddr;
@@ -42,6 +38,9 @@ public class PostDTO {
     private String outPlaceAcpPosblAt;
     private String fcltyInfoDc;
     private String petAcpAditChrgeValue;
-    private int viewCount;
+    private Long memberNo;
+    private LocalDateTime createdDate;
+    private String status = "AWAITING";
     private String statusExplanation;
+    private int viewCount;
 }
