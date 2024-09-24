@@ -108,8 +108,10 @@ public class CsvToDbController {
                     continue; // 잘못된 값이 있을 경우 해당 라인을 건너뛰고 다음 라인으로 진행
                 }
 
-                dto.setStatusExplanation(nextLine[30]);
+
+                dto.setStatusExplanation(nextLine[31]);
                 dto.setViewCount(0); // view_count는 int로 변환
+
 
                 // DTO에서 Entity로 변환
                 Post post = Post.builder()
@@ -144,7 +146,7 @@ public class CsvToDbController {
                         .viewCount(dto.getViewCount())
                         .statusExplanation(dto.getStatusExplanation())
                         .createdDate(dto.getCreatedDate())
-                        .status(Status.AWAITING) // 기본 상태는 AWAITING
+                        .status(Status.APPROVED) // 기본 상태는 Awaiting
                         .member(member)
                         .build();
 
