@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@Builder
 public class PostDTO {
     private String fcltyNm;
     private String ctgryTwoNm;
