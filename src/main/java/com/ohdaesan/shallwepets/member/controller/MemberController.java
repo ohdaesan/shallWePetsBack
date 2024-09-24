@@ -22,13 +22,9 @@ import java.util.NoSuchElementException;
 public class MemberController {
     private final MemberService memberService;
 
-    @GetMapping("/register")
-    public String register() { return "member/signup"; }
-
     // 회원가입 요청
     @PostMapping("/register")
     public ResponseEntity<ResponseDTO> signup(@RequestBody MemberDTO memberDTO) {
-        System.out.println(memberDTO);
         MemberDTO savedMemberDTO = memberService.register(memberDTO);
 
         return ResponseEntity
