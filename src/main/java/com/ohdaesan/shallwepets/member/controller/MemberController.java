@@ -43,7 +43,7 @@ public class MemberController {
 
     @PostMapping("/findId")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> findId(@RequestBody Map<String, String> params) {
+    public ResponseEntity<ResponseDTO> findId(@RequestBody Map<String, String> params) {
         Map<String, String> response = new HashMap<>();
 
         try {
@@ -63,10 +63,11 @@ public class MemberController {
 
             response.put("memberId", memberId);
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok().body(new ResponseDTO(200, "memberId 존재 여부 확인 성공", response));
         } catch (NoSuchElementException e) {
             response.put("error", "아이디를 찾을 수 없습니다.\n입력하신 정보를 다시 확인해주세요.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "memberId 찾기 실패", response));
         }
     }
 
