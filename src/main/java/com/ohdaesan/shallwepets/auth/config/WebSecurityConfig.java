@@ -108,6 +108,8 @@ public class WebSecurityConfig {
                                 .requestMatchers("/points/**").permitAll()
 //                        .requestMatchers("/post/createPost","/post/modifyPost/**","/post/delete/**").authenticated()
                                 .requestMatchers("/review/**").permitAll()
+                                .requestMatchers("/review/**/**").permitAll()
+//                                .requestMatchers("/review/member/**").permitAll()
 
                         .anyRequest()
                         .authenticated()    // 나머지 요청은 인증 필요

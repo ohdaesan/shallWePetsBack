@@ -61,7 +61,7 @@ public class ReviewController {
                 .body(new ResponseDTO(200, "리뷰 조회 성공", responseMap));
     }
 
-    // 단일조회
+    // 단일조회(reviewNo)
     @Operation(summary = "searchReviewById", description = "리뷰 단일 조회")
     @GetMapping("/{reviewNo}")
     public ResponseEntity<ResponseDTO> getReviewByNo(@PathVariable Long reviewNo) {
@@ -73,6 +73,30 @@ public class ReviewController {
         return ResponseEntity.ok()
                 .body(new ResponseDTO(200, "리뷰 조회 성공", responseMap));
     }
+
+    // 포스트 넘버로 모든 리뷰 조회
+    @Operation(summary = "getReviewsByPostNo", description = "포스트 번호로 리뷰 조회")
+    @GetMapping("/post/{postNo}")
+    public ResponseEntity<ResponseDTO> getReviewsByPostNo(@PathVariable Long postNo) {
+        List<ReviewDTO> reviewList = reviewService.getReviewsByPostNo(postNo);
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("reviews", reviewList);
+        return ResponseEntity.ok(new ResponseDTO(200, "리뷰 조회 성공", responseMap));
+    }
+
+
+
+    // MemberNo로 리뷰 조회
+    @Operation(summary = "getReviewsByMemberNo", description = "회원 번호로 리뷰 조회")
+    @GetMapping("/member/{memberNo}")
+    public ResponseEntity<ResponseDTO> getReviewsByMemberNo(@PathVariable Long memberNo) {
+        List<ReviewDTO> reviewList = reviewService.getReviewsByMemberNo(memberNo);
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("reviews", reviewList);
+        return ResponseEntity.ok(new ResponseDTO(200, "리뷰 조회 성공", responseMap));
+    }
+
+
 
 
     // 리뷰 삭제

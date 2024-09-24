@@ -90,6 +90,7 @@ public class ReviewService {
     }
 
 
+    // 리뷰 넘버로 조회
     @Transactional(readOnly = true)
     public ReviewDTO getReviewByNo(Long reviewNo) {
         Review review = reviewRepository.findById(reviewNo)
@@ -106,6 +107,58 @@ public class ReviewService {
 
         return reviewDTO;
     }
+
+    // 포스트 넘버로 조회
+    @Transactional(readOnly = true)
+    public List<ReviewDTO> getReviewsByPostNo(Long postNo) {
+        Post post = postRepository.findById(postNo)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+
+        List<Review> reviews = reviewRepository.findByPost(post);
+
+        return reviews.stream()
+                .map(review -> {
+                    ReviewDTO reviewDTO = new ReviewDTO();
+                    reviewDTO.setReviewNo(review.getReviewNo());
+                    reviewDTO.setMemberNo(review.getMember().getMemberNo());
+                    reviewDTO.setPostNo(review.getPost().getPostNo());
+                    reviewDTO.setRate(review.getRate());
+                    reviewDTO.setContent(review.getContent());
+                    reviewDTO.setCreatedDate(review.getCreatedDate());
+                    reviewDTO.setModifiedDate(review.getModifiedDate());
+                    return reviewDTO;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
+    // 멤버 넘버로 조회
+    @Transactional(readOnly = true)
+    public List<ReviewDTO> getReviewsByMemberNo(Long memberNo) {
+        Member member = memberRepository.findById(memberNo)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+
+        List<Review> reviews = reviewRepository.findByMember(member);
+
+        return reviews.stream()
+                .map(review -> {
+                    ReviewDTO reviewDTO = new ReviewDTO();
+                    reviewDTO.setReviewNo(review.getReviewNo());
+                    reviewDTO.setMemberNo(review.getMember().getMemberNo());
+                    reviewDTO.setPostNo(review.getPost().getPostNo());
+                    reviewDTO.setRate(review.getRate());
+                    reviewDTO.setContent(review.getContent());
+                    reviewDTO.setCreatedDate(review.getCreatedDate());
+                    reviewDTO.setModifiedDate(review.getModifiedDate());
+                    return reviewDTO;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
 
     @Transactional
     public void deleteReview(Long reviewNo) {
