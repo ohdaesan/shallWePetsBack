@@ -69,6 +69,8 @@ dependencies {
 
     // Testing libraries
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation group: 'net.nurigo', name: 'javaSDK', version: '2.2'
 }
 
 tasks.named('test') {
