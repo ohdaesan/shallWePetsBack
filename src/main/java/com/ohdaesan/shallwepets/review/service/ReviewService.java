@@ -1,8 +1,9 @@
 package com.ohdaesan.shallwepets.review.service;
 
-import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
+import com.ohdaesan.shallwepets.point.domain.entity.Point;
+import com.ohdaesan.shallwepets.point.repository.PointRepository;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
 import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
@@ -27,10 +28,12 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final ModelMapper modelMapper; // ModelMapper 주입
+    private final PointRepository pointRepository;
 
 
     @Transactional
     public void createReview(ReviewDTO reviewDTO) {
+        log.info("seveice 옴");
         // Member와 Post는 외부에서 매핑된 엔티티이므로, ID를 통해 직접 조회해 설정해줍니다.
         Member member = memberRepository.findById(reviewDTO.getMemberNo())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid member ID"));
@@ -48,9 +51,23 @@ public class ReviewService {
                 .modifiedDate(null)     // 처음 생성 시 수정 날짜는 null
                 .build();
 
-        // Review 엔티티를 데이터베이스에 저장
         reviewRepository.save(review);
+        log.info("Review saved: {}", review);
+
+        // Review 엔티티를 데이터베이스에 저장
+        Point point = Point.builder()
+                .member(review.getMember())
+                .point(10)
+                .createdDate(LocalDateTime.now())
+                .comment("Review submitted, points awarded")
+                .build();
+
+        log.info("여기까지 왔니?");
+        // Save the points
+        pointRepository.save(point);
+
     }
+
 
 
     @Transactional(readOnly = true)
@@ -92,9 +109,25 @@ public class ReviewService {
 
     @Transactional
     public void deleteReview(Long reviewNo) {
+        // Fetch the review to be deleted
         Review review = reviewRepository.findById(reviewNo)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewNo));
+
+        // Deduct points from the member
+        Member member = review.getMember(); // Get the associated member
+        Point pointDeduction = Point.builder()
+                .member(member)
+                .point(-10) // Deducting 10 points
+                .createdDate(LocalDateTime.now())
+                .comment("Points deducted due to review deletion") // Optional comment
+                .build();
+
+        // Save the point deduction
+        pointRepository.save(pointDeduction);
+
+        // Delete the review
         reviewRepository.delete(review);
+        log.info("Review deleted: {}. Points deducted from member: {}", reviewNo, member.getMemberNo());
     }
 
 }

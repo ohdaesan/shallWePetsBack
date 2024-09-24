@@ -40,9 +40,6 @@ public class ReviewController {
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("result", "리뷰 등록에 성공하였습니다.");
 
-        // ResponseDTO는 상태 코드와 메시지, 데이터를 포함합니다.
-        ResponseDTO responseDTO = new ResponseDTO(201, "리뷰 작성 성공", responseMap);
-
         // ResponseEntity를 사용해 HTTP 응답을 반환
         return ResponseEntity
                 .ok()
