@@ -12,4 +12,5 @@ public class ImagesDTO {
     private String imageUrl;
     private String imageName;
     private String imageSavedName;
+    private String imageSavedPath;
 }
