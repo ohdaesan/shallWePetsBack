@@ -1,6 +1,6 @@
 package com.ohdaesan.shallwepets.auth.handler;
 
-
+import com.ohdaesan.shallwepets.global.UserStatusException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,35 +24,44 @@ public class CustomAuthFailUserHandler implements AuthenticationFailureHandler {
         String failMsg;
         if (exception instanceof AuthenticationServiceException) {
             // 사용자의 로그인 또는 인증 처리 과정에서 문제가 발생한다.
-            failMsg = "존재하지 않는 사용자입니다.";
+//            failMsg = "존재하지 않는 사용자입니다.";
+            failMsg = "아이디 또는 비밀번호가 틀립니다.";
 
         } else if(exception instanceof BadCredentialsException) {
             // BadCredentialsException 오류는 사용자의 아이디가 DB에 존재하지 않는 경우, 비밀번호가 맞지 않는 경우 발생
             failMsg = "아이디 또는 비밀번호가 틀립니다.";
 
+        } else if(exception instanceof UserStatusException) {
+            // 회원 status가 ACTIVATED가 아닐 때
+            failMsg = "정지된 회원이거나 탈퇴한 회원입니다.";
+
         } else if(exception instanceof LockedException) {
             // 계정이 잠긴 경우 발생
-            failMsg ="잠긴 계정입니다.";
+            failMsg = "잠긴 계정입니다.";
 
         } else if(exception instanceof DisabledException) {
             // 비활성화 된 계정에서 발생
-            failMsg ="비활성화된 계정입니다.";
+            failMsg = "비활성화된 계정입니다.";
 
         } else if(exception instanceof AccountExpiredException) {
             // 계정 만료시 발생
-            failMsg ="만료된 계정입니다.";
+            failMsg = "만료된 계정입니다.";
 
         } else if(exception instanceof CredentialsExpiredException) {
             // 자격 증명이 만료되는 경우 발생
             failMsg = "자격증명이 만료되었습니다.";
+
         } else if (exception instanceof AuthenticationCredentialsNotFoundException) {
             // 보안 컨텍스트에 인증 객체가 존재하지 않거나 인증 정보가 없는 상태에서 보안처리된 리소스에 접근하는 경우 발생
             failMsg = "인증 요청이 거부되었습니다.";
-        }else if (exception instanceof UsernameNotFoundException) {
+
+        } else if (exception instanceof UsernameNotFoundException) {
             // DB에 사용자의 정보가 없는 경우 발생
-            failMsg = "존재하지 않는 사용자 입니다.";
-        }else{
-            failMsg = "정의되있는 케이스의 오류가 아닙니다.";
+//            failMsg = "존재하지 않는 사용자 입니다.";
+            failMsg = "아이디 또는 비밀번호가 틀립니다.";
+
+        } else {
+            failMsg = "정의되어있는 케이스의 오류가 아닙니다.";
         }
 
         response.setCharacterEncoding("UTF-8");
@@ -60,7 +69,7 @@ public class CustomAuthFailUserHandler implements AuthenticationFailureHandler {
         PrintWriter printWriter = response.getWriter();
 
         HashMap<String, Object> resultMap = new HashMap<>();
-        resultMap.put("failType",failMsg);
+        resultMap.put("failType", failMsg);
 
         jsonObject = new JSONObject(resultMap);
 

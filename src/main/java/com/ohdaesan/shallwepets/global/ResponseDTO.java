@@ -1,4 +1,4 @@
-package com.ohdaesan.shallwepets.auth.common;
+package com.ohdaesan.shallwepets.global;
 
 import lombok.*;
 import org.springframework.http.HttpStatus;

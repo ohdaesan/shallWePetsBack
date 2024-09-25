@@ -1,6 +1,6 @@
 package com.ohdaesan.shallwepets.member.controller;
 
-import com.ohdaesan.shallwepets.auth.common.ResponseDTO;
+import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.service.MemberService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,13 +22,9 @@ import java.util.NoSuchElementException;
 public class MemberController {
     private final MemberService memberService;
 
-    @GetMapping("/register")
-    public String register() { return "member/signup"; }
-
     // 회원가입 요청
     @PostMapping("/register")
     public ResponseEntity<ResponseDTO> signup(@RequestBody MemberDTO memberDTO) {
-        System.out.println(memberDTO);
         MemberDTO savedMemberDTO = memberService.register(memberDTO);
 
         return ResponseEntity
@@ -43,7 +39,7 @@ public class MemberController {
 
     @PostMapping("/findId")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> findId(@RequestBody Map<String, String> params) {
+    public ResponseEntity<ResponseDTO> findId(@RequestBody Map<String, String> params) {
         Map<String, String> response = new HashMap<>();
 
         try {
@@ -63,16 +59,16 @@ public class MemberController {
 
             response.put("memberId", memberId);
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok().body(new ResponseDTO(200, "memberId 존재 여부 확인 성공", response));
         } catch (NoSuchElementException e) {
             response.put("error", "아이디를 찾을 수 없습니다.\n입력하신 정보를 다시 확인해주세요.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "memberId 찾기 실패", response));
         }
     }
 
     @PostMapping("/findPwd")
     @ResponseBody
-    public ResponseEntity<Map<String, Boolean>> findPwd(@RequestBody Map<String, String> params) {
+    public ResponseEntity<ResponseDTO> findPwd(@RequestBody Map<String, String> params) {
         Map<String, Boolean> response = new HashMap<>();
 
         try {
@@ -93,15 +89,15 @@ public class MemberController {
 
             response.put("exists", exists);
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok().body(new ResponseDTO(200, "회원 존재 여부 확인 성공", response));
         } catch (NoSuchElementException e) {
             response.put("error", false);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "회원 찾기 실패", response));
         }
     }
 
     @PostMapping("/changePwdNotLoggedIn")
-    public ResponseEntity<Map<String, String>> changePwNotLoggedIn(@RequestBody Map<String, String> params) {
+    public ResponseEntity<ResponseDTO> changePwNotLoggedIn(@RequestBody Map<String, String> params) {
         Map<String, String> response = new HashMap<>();
 
         String memberId = params.get("memberId");
@@ -111,18 +107,18 @@ public class MemberController {
         // 서버사이드에서도 확인
         if (modifiedPw == null || modifiedPwConfirm == null || !modifiedPw.equals(modifiedPwConfirm)) {
             response.put("error", "비밀번호와 비밀번호 확인이 서로 일치하지 않습니다.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(new ResponseDTO(400, "비밀번호 변경 실패", response));
         }
 
         String regexPw = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$";
         if (!modifiedPw.matches(regexPw)) {
             response.put("error", "비밀번호는 최소 8자 이상이어야 하며, 적어도 하나의 문자, 숫자 및 특수 문자를 포함해야 합니다.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(new ResponseDTO(400, "비밀번호 변경 실패", response));
         }
 
         if (memberService.isPasswordInUse(memberId, modifiedPw)) {
             response.put("error", "기존과 같은 비밀번호는 사용하실 수 없습니다.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(new ResponseDTO(400, "비밀번호 변경 실패", response));
         }
 
         try {
@@ -132,6 +128,37 @@ public class MemberController {
             response.put("error", "존재하지 않는 회원입니다.");
         }
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(new ResponseDTO(200, "비밀번호 변경 성공", response));
+    }
+
+    @GetMapping("/checkId")
+    public ResponseEntity<ResponseDTO> checkMemberId(@RequestParam String memberId) {
+        boolean exists = memberService.existsMemberId(memberId);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok().body(new ResponseDTO(200, "memberId 존재 여부 확인 성공", response));
+    }
+
+    @GetMapping("/checkNickname")
+    public ResponseEntity<ResponseDTO> checkNickname(@RequestParam String memberNickname) {
+        boolean exists = memberService.existsNickname(memberNickname);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok().body(new ResponseDTO(200, "memberNickname 존재 여부 확인 성공", response));
+    }
+
+    @GetMapping("/checkUser")
+    public ResponseEntity<ResponseDTO> checkUser(
+            @RequestParam String memberEmail,
+            @RequestParam String memberPhone) {
+        boolean emailExists = memberService.existsEmail(memberEmail);
+        boolean phoneExists = memberService.existsPhone(memberPhone);
+
+        Map<String, Boolean> response = new HashMap<>();
+
+        response.put("emailExists", emailExists);
+        response.put("phoneExists", phoneExists);
+
+        return ResponseEntity.ok().body(new ResponseDTO(200, "email과 전화번호 이용한 멤버 존재 여부 확인 성공", response));
     }
 }
