@@ -13,8 +13,9 @@ import org.springframework.stereotype.Service;
 public class ImagesService {
     private final ImagesRepository imagesRepository;
 
-    public void save(ImagesDTO imagesDTO) {
+    public Images save(ImagesDTO imagesDTO) {
         Images image = new Images(imagesDTO.getImageUrl(), imagesDTO.getImageOrigName(), imagesDTO.getImageSavedName());
         imagesRepository.save(image);
+        return image;
     }
 }
