@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class PostService {
     private final PostRepository postRepository;
-    private final MemberRepository memberRepository;
 
 
 
@@ -24,7 +23,6 @@ public class PostService {
 
         Long memberNo = post.getMember().getMemberNo();
 
-        // Map post details to PostDTO
         PostDTO postDTO = PostDTO.builder()
                 .fcltyNm(post.getFcltyNm())
                 .ctgryTwoNm(post.getCtgryTwoNm())

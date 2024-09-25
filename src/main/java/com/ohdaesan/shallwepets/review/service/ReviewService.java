@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -111,27 +112,47 @@ public class ReviewService {
     // 포스트 넘버로 조회
     @Transactional(readOnly = true)
     public List<ReviewDTO> getReviewsByPostNo(Long postNo) {
-        Post post = postRepository.findById(postNo)
-                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+        // 포스트 번호로 리뷰를 데이터베이스에서 가져오기
+        List<Review> reviews = reviewRepository.findByPost_PostNo(postNo);
 
-        List<Review> reviews = reviewRepository.findByPost(post);
+        // 엔티티를 DTO로 변환
+        List<ReviewDTO> reviewDTOs = new ArrayList<>();
 
-        return reviews.stream()
-                .map(review -> {
-                    ReviewDTO reviewDTO = new ReviewDTO();
-                    reviewDTO.setReviewNo(review.getReviewNo());
-                    reviewDTO.setMemberNo(review.getMember().getMemberNo());
-                    reviewDTO.setPostNo(review.getPost().getPostNo());
-                    reviewDTO.setRate(review.getRate());
-                    reviewDTO.setContent(review.getContent());
-                    reviewDTO.setCreatedDate(review.getCreatedDate());
-                    reviewDTO.setModifiedDate(review.getModifiedDate());
-                    return reviewDTO;
-                })
-                .collect(Collectors.toList());
+        for (Review review : reviews) {
+            ReviewDTO reviewDTO = new ReviewDTO();
+            reviewDTO.setReviewNo(review.getReviewNo());
+            reviewDTO.setContent(review.getContent());
+            reviewDTO.setRate(review.getRate());
+            reviewDTO.setCreatedDate(review.getCreatedDate());
+            reviewDTO.setModifiedDate(review.getModifiedDate());
+
+            // postNo 수동으로 설정
+            if (review.getPost() != null) {
+                reviewDTO.setPostNo(review.getPost().getPostNo());
+            }
+
+            reviewDTOs.add(reviewDTO);
+        }
+
+        return reviewDTOs;
     }
 
+    // 평균 rate(별점) 구하기
+    @Transactional(readOnly = true)
+    public Double getAverageRateByPostNo(Long postNo) {
+        List<Review> reviews = reviewRepository.findByPost_PostNo(postNo);
 
+        if (reviews.isEmpty()) {
+            return 0.0; // 리뷰가 없을 경우 0.0 반환
+        }
+
+        double averageRate = reviews.stream()
+                .mapToInt(Review::getRate)
+                .average()
+                .orElse(0.0); // 평균 계산, 리뷰가 없으면 0.0 반환
+
+        return averageRate;
+    }
 
 
     // 멤버 넘버로 조회
@@ -157,6 +178,37 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
+    // 리뷰수정
+    @Transactional
+    public ReviewDTO updateReview(Long reviewNo, ReviewDTO reviewDTO) {
+        Review existingReview = reviewRepository.findById(reviewNo)
+                .orElseThrow(() -> new EntityNotFoundException("리뷰가 존재하지 않습니다."));
+
+        // Create a new Review instance using the existing one with updated values
+        Review updatedReview = Review.builder()
+                .reviewNo(existingReview.getReviewNo()) // Keep the same reviewNo
+                .member(existingReview.getMember()) // Keep the same member
+                .post(existingReview.getPost()) // Keep the same post
+                .rate(reviewDTO.getRate()) // Update the rate
+                .content(reviewDTO.getContent()) // Update the content
+                .createdDate(existingReview.getCreatedDate()) // Keep the createdDate
+                .modifiedDate(LocalDateTime.now()) // Update the modifiedDate
+                .build();
+
+        // Save the updated review
+        reviewRepository.save(updatedReview);
+
+        // Create a new ReviewDTO for the updated review
+        return new ReviewDTO(
+                updatedReview.getReviewNo(),
+                updatedReview.getMember().getMemberNo(),
+                updatedReview.getPost().getPostNo(),
+                updatedReview.getRate(),
+                updatedReview.getContent(),
+                updatedReview.getCreatedDate(),
+                updatedReview.getModifiedDate()
+        );
+    }
 
 
 
@@ -181,6 +233,26 @@ public class ReviewService {
         // Delete the review
         reviewRepository.delete(review);
         log.info("Review deleted: {}. Points deducted from member: {}", reviewNo, member.getMemberNo());
+    }
+
+    // 엔티티 리스트를 DTO 리스트로 변환하는 메서드
+    private List<ReviewDTO> convertToDto(List<Review> reviewList) {
+        List<ReviewDTO> reviewDTOList = new ArrayList<>();
+
+        for (Review review : reviewList) {
+            ReviewDTO dto = new ReviewDTO();
+            dto.setReviewNo(review.getReviewNo());
+            dto.setPostNo(review.getPost().getPostNo());
+            dto.setMemberNo(review.getMember().getMemberNo());
+            dto.setRate(review.getRate());
+            dto.setContent(review.getContent());
+            dto.setCreatedDate(review.getCreatedDate());
+            dto.setModifiedDate(review.getModifiedDate());
+
+            reviewDTOList.add(dto);
+        }
+
+        return reviewDTOList;
     }
 
 }

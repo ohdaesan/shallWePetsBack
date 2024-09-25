@@ -113,6 +113,8 @@ public class WebSecurityConfig {
 //                        .requestMatchers("/post/createPost","/post/modifyPost/**","/post/delete/**").authenticated()
                         .requestMatchers("/review/**").permitAll()
                         .requestMatchers("/review/**/**").permitAll()
+                        .requestMatchers("/bookmark/**").permitAll()
+                        .requestMatchers("/bookmark/**/**").permitAll()
 //                        .requestMatchers("/review/member/**").permitAll()
 
                         .anyRequest()
