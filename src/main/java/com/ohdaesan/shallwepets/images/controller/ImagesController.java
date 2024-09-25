@@ -1,6 +1,7 @@
 package com.ohdaesan.shallwepets.images.controller;
 
 import com.ohdaesan.shallwepets.global.ResponseDTO;
+import com.ohdaesan.shallwepets.images.domain.entity.Images;
 import com.ohdaesan.shallwepets.images.service.S3Service;
 import com.ohdaesan.shallwepets.images.domain.dto.ImagesDTO;
 import com.ohdaesan.shallwepets.images.service.ImagesService;
@@ -40,9 +41,9 @@ public class ImagesController {
             imagesDTO.setImageOrigName(imageOrigName);
             imagesDTO.setImageSavedName(imageSavedName);
 
-            imagesService.save(imagesDTO);
+            Images savedImage = imagesService.save(imagesDTO);
 
-            return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 업로드 성공", imageUrl));
+            return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 업로드 성공", savedImage.getImageNo()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
