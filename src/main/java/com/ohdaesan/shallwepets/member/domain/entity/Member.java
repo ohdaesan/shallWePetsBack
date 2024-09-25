@@ -28,7 +28,9 @@ public class Member {
     private String memberEmail;
     private String memberPhone;
     private String memberDob;
-    private String memberAddress;
+    private String memberZipcode;
+    private String memberRoadAddress;
+    private String memberDetailAddress;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 

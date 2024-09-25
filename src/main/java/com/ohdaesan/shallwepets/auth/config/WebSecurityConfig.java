@@ -96,6 +96,8 @@ public class WebSecurityConfig {
                         .requestMatchers("/member/login").anonymous()
                         .requestMatchers("/sendMail").permitAll()
                         .requestMatchers("/checkMail").permitAll()
+                        .requestMatchers("/sendSms").permitAll()
+                        .requestMatchers("/checkSms").permitAll()
                         .requestMatchers("/import-csv").permitAll()
                         .requestMatchers("/member/checkId").anonymous()
                         .requestMatchers("/member/checkNickname").anonymous()
@@ -104,12 +106,13 @@ public class WebSecurityConfig {
                         .requestMatchers("/member/findId").anonymous()
                         .requestMatchers("/member/findPwd").anonymous()
                         .requestMatchers("/member/changePwdNotLoggedIn").anonymous()
-//                        .requestMatchers("/post/postList","/post/detailPost/**").permitAll()
+                        .requestMatchers("/post/**").permitAll()
+                                .requestMatchers("/points/**").permitAll()
 //                        .requestMatchers("/post/createPost","/post/modifyPost/**","/post/delete/**").authenticated()
-                                .requestMatchers("/review/createReview").permitAll()
-                                .requestMatchers("/review/reviews").permitAll()
-                                .requestMatchers("/review/{reviewNo}").permitAll()
-                                .requestMatchers("/review/{reviewNo}").permitAll()
+                                .requestMatchers("/review/**").permitAll()
+                                .requestMatchers("/review/**/**").permitAll()
+//                                .requestMatchers("/review/member/**").permitAll()
+
                         .anyRequest()
                         .authenticated()    // 나머지 요청은 인증 필요
                 );

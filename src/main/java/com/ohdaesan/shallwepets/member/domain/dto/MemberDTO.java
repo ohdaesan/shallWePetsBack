@@ -19,11 +19,13 @@ public class MemberDTO {
     private String memberEmail;
     private String memberPhone;
     private String memberDob;
-    private String memberAddress;
+    private String memberZipcode;
+    private String memberRoadAddress;
+    private String memberDetailAddress;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private String status = "ACTIVATED";
     private String memberRole = "USER";
-    private String grade;
+    private String grade = "치와와";
     private Long imageNo;
 }
