@@ -86,36 +86,38 @@ public class WebSecurityConfig {
                 .addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 
                 // header에 토큰이 담겨져 있을 경우 인가 처리를 해주는 필터
-                .addFilterBefore(jwtAuthorizationFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthorizationFilter(), BasicAuthenticationFilter.class);
 
                 // 접근 url 설정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()  // Swagger 관련 리소스와 회원가입 경로 허용
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/member/register").anonymous()    // 회원가입은 비인증 사용자만 접근
-                        .requestMatchers("/member/login").anonymous()
-                        .requestMatchers("/sendMail").permitAll()
-                        .requestMatchers("/checkMail").permitAll()
-                        .requestMatchers("/sendSms").permitAll()
-                        .requestMatchers("/checkSms").permitAll()
-                        .requestMatchers("/import-csv").permitAll()
-                        .requestMatchers("/member/checkId").anonymous()
-                        .requestMatchers("/member/checkNickname").anonymous()
-                        .requestMatchers("/member/checkUser").anonymous()
-//                        .requestMatchers("/member/checkStatus").anonymous()
-                        .requestMatchers("/member/findId").anonymous()
-                        .requestMatchers("/member/findPwd").anonymous()
-                        .requestMatchers("/member/changePwdNotLoggedIn").anonymous()
-                        .requestMatchers("/post/**").permitAll()
-                                .requestMatchers("/points/**").permitAll()
-//                        .requestMatchers("/post/createPost","/post/modifyPost/**","/post/delete/**").authenticated()
-                                .requestMatchers("/review/**").permitAll()
-                                .requestMatchers("/review/**/**").permitAll()
-//                                .requestMatchers("/review/member/**").permitAll()
-
-                        .anyRequest()
-                        .authenticated()    // 나머지 요청은 인증 필요
-                );
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()  // Swagger 관련 리소스와 회원가입 경로 허용
+////                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/member/register").anonymous()    // 회원가입은 비인증 사용자만 접근
+//                        .requestMatchers("/member/login").anonymous()
+//                        .requestMatchers("/sendMail").permitAll()
+//                        .requestMatchers("/checkMail").permitAll()
+//                        .requestMatchers("/sendSms").permitAll()
+//                        .requestMatchers("/checkSms").permitAll()
+//                        .requestMatchers("/import-csv").permitAll()
+//                        .requestMatchers("/member/checkId").anonymous()
+//                        .requestMatchers("/member/checkNickname").anonymous()
+//                        .requestMatchers("/member/checkUser").anonymous()
+////                        .requestMatchers("/member/checkStatus").anonymous()
+//                        .requestMatchers("/member/findId").anonymous()
+//                        .requestMatchers("/member/findPwd").anonymous()
+//                        .requestMatchers("/member/changePwdNotLoggedIn").anonymous()
+//                        .requestMatchers("/post/**").permitAll()
+//                                .requestMatchers("/points/**").permitAll()
+////                        .requestMatchers("/post/createPost","/post/modifyPost/**","/post/delete/**").authenticated()
+//                                .requestMatchers("/review/**").permitAll()
+//                                .requestMatchers("/review/**/**").permitAll()
+//                                .requestMatchers("/bookmark/**").permitAll()
+//                                .requestMatchers("/bookmark/**/**").permitAll()
+//
+//
+//                        .anyRequest()
+//                        .authenticated()    // 나머지 요청은 인증 필요
+//                );
 
         return http.build();
     }
