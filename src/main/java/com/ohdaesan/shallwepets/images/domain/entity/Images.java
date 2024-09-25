@@ -9,15 +9,21 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "images")
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 @Getter
-@Builder
+//@Builder
 public class Images {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long imageNo;
 
     private String imageUrl;
-    private String imageName;
+    private String imageOrigName;
     private String imageSavedName;
+
+    public Images(String imageUrl, String imageOrigName, String imageSavedName) {
+        this.imageUrl = imageUrl;
+        this.imageOrigName = imageOrigName;
+        this.imageSavedName = imageSavedName;
+    }
 }
