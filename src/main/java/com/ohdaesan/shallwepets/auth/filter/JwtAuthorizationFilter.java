@@ -53,6 +53,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/member/register",          // 회원가입 시 토큰이 없어도 요청 가능하게
                 "/member/findId",
                 "/member/findPwd",
+                "/member/findNickname",
                 "/member/changePwdNotLoggedIn",
                 "/member/checkId",
                 "/member/checkNickname",

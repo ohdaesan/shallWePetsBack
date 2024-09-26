@@ -45,14 +45,20 @@ public class MemberService {
 
     public String findMemberIdByMemberNameAndMemberEmail(String name, String email) {
         Member member = memberRepository.findMemberByMemberNameAndMemberEmail(name, email)
-                .orElseThrow(() -> new NoSuchElementException("No member found with the provided name and email"));
+                .orElseThrow(() -> new NoSuchElementException("해당 이름과 이메일로 가입한 회원이 존재하지 않습니다."));
         return member.getMemberId();
     }
 
     public String findMemberIdByMemberNameAndMemberPhone(String name, String phone) {
         Member member = memberRepository.findMemberByMemberNameAndMemberPhone(name, phone)
-                .orElseThrow(() -> new NoSuchElementException("No member found with the provided name and phone"));
+                .orElseThrow(() -> new NoSuchElementException("해당 이름과 번호로 가입한 회원이 존재하지 않습니다."));
         return member.getMemberId();
+    }
+
+    public String findNicknameByMemberNo(Long memberNo) {
+        Member member = memberRepository.findMemberByMemberNo(memberNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 아이디를 가진 회원이 존재하지 않습니다."));
+        return member.getMemberNickname();
     }
 
     public boolean existsByMemberIdAndMemberNameAndMemberEmail(String memberId, String name, String email) {
