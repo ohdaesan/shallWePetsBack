@@ -96,6 +96,23 @@ public class MemberController {
         }
     }
 
+    @PostMapping("/findNickname")
+    public ResponseEntity<ResponseDTO> findNicknameByMemberNo(@RequestBody Map<String, String> params) {
+        Map<String, String> response = new HashMap<>();
+
+        Long memberNo = Long.valueOf(params.get("memberNo"));
+
+        try {
+            String memberNickname = memberService.findNicknameByMemberNo(memberNo);
+            response.put("nickname", memberNickname);
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "닉네임 찾기 성공", response));
+        } catch (NoSuchElementException e) {
+            response.put("error", "닉네임을 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "닉네임 찾기 실패", response));
+        }
+    }
+
     @PostMapping("/changePwdNotLoggedIn")
     public ResponseEntity<ResponseDTO> changePwNotLoggedIn(@RequestBody Map<String, String> params) {
         Map<String, String> response = new HashMap<>();
