@@ -104,7 +104,6 @@ public class WebSecurityConfig {
 //                        .requestMatchers("/member/checkId").anonymous()
 //                        .requestMatchers("/member/checkNickname").anonymous()
 //                        .requestMatchers("/member/checkUser").anonymous()
-////                        .requestMatchers("/member/checkStatus").anonymous()
 //                        .requestMatchers("/member/findId").anonymous()
 //                        .requestMatchers("/member/findPwd").anonymous()
 //                        .requestMatchers("/member/changePwdNotLoggedIn").anonymous()
@@ -114,6 +113,8 @@ public class WebSecurityConfig {
 //                        .requestMatchers("/review/**").permitAll()
 //                        .requestMatchers("/review/**/**").permitAll()
 ////                        .requestMatchers("/review/member/**").permitAll()
+//                        .requestMatchers("/bookmark/**").permitAll()
+//                        .requestMatchers("/bookmark/**/**").permitAll()
 //
 //                        .anyRequest()
 //                        .authenticated()    // 나머지 요청은 인증 필요
