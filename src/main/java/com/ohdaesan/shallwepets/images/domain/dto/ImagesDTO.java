@@ -1,6 +1,7 @@
 package com.ohdaesan.shallwepets.images.domain.dto;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -10,7 +11,9 @@ import lombok.*;
 public class ImagesDTO {
     private Long imageNo;
     private String imageUrl;
-    private String imageName;
+    private String imageOrigName;
     private String imageSavedName;
     private String imageSavedPath;
+
+    private MultipartFile file;
 }
