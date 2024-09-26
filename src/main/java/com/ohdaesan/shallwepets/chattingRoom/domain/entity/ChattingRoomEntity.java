@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Builder
-public class ChattingRoom {
+public class ChattingRoomEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chattingRoomNo;
