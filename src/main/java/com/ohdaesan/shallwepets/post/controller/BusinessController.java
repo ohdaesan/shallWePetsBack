@@ -20,7 +20,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/map")
+@RequestMapping("/select_location")
 public class BusinessController {
 
     private final BusinessService businessService;
