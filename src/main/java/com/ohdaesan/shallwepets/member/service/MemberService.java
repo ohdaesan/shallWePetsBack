@@ -57,8 +57,14 @@ public class MemberService {
 
     public String findNicknameByMemberNo(Long memberNo) {
         Member member = memberRepository.findMemberByMemberNo(memberNo)
-                .orElseThrow(() -> new NoSuchElementException("해당 아이디를 가진 회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 번호의 회원이 존재하지 않습니다."));
         return member.getMemberNickname();
+    }
+
+    public String findGradeByMemberNo(Long memberNo) {
+        Member member = memberRepository.findMemberByMemberNo(memberNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 번호의 회원이 존재하지 않습니다."));
+        return member.getGrade().toString();
     }
 
     public boolean existsByMemberIdAndMemberNameAndMemberEmail(String memberId, String name, String email) {

@@ -54,6 +54,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/member/findId",
                 "/member/findPwd",
                 "/member/findNickname",
+                "/member/findGrade",
                 "/member/changePwdNotLoggedIn",
                 "/member/checkId",
                 "/member/checkNickname",
