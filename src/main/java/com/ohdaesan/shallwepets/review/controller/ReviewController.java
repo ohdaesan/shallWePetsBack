@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ public class ReviewController {
                 .body(new ResponseDTO(200, "리뷰 조회 성공", responseMap));
     }
 
+
     // 단일조회(reviewNo)
     @Operation(summary = "searchReviewById", description = "리뷰 단일 조회")
     @GetMapping("/{reviewNo}")
@@ -74,13 +76,15 @@ public class ReviewController {
     }
 
     // 포스트 넘버로 모든 리뷰 조회
-    @Operation(summary = "getReviewsByPostNo", description = "포스트 번호로 리뷰 조회")
+    @Operation(summary = "getReviewsByPostNo", description = "포스트 번호로 리뷰 조회 및 정렬")
     @GetMapping("/post/{postNo}")
-    public ResponseEntity<ResponseDTO> getReviewsByPostNo(@PathVariable Long postNo) {
-        log.info("Fetching reviews for postNo: {}", postNo);
+    public ResponseEntity<ResponseDTO> getReviewsByPostNo(
+            @PathVariable Long postNo,
+            @RequestParam(value = "sortOrder", defaultValue = "recent") String sortOrder) { // sortOrder 추가
+        log.info("Fetching reviews for postNo: {} with sortOrder: {}", postNo, sortOrder);
 
         // 리뷰 목록 조회
-        List<ReviewDTO> reviewList = reviewService.getReviewsByPostNo(postNo);
+        List<ReviewDTO> reviewList = reviewService.getReviewsByPostNo(postNo, sortOrder); // 정렬 기준 전달
 
         // 리뷰 총 개수 계산
         int reviewCount = reviewList.size();
@@ -93,14 +97,18 @@ public class ReviewController {
         return ResponseEntity.ok(new ResponseDTO(200, "리뷰 조회 성공", responseMap));
     }
 
+
     // MemberNo로 리뷰 조회
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "getReviewsByMemberNo", description = "회원 번호로 리뷰 조회")
     @GetMapping("/member/{memberNo}")
     public ResponseEntity<ResponseDTO> getReviewsByMemberNo(@PathVariable Long memberNo) {
         List<ReviewDTO> reviewList = reviewService.getReviewsByMemberNo(memberNo);
+
+        int memberReviewCount = reviewList.size();
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("reviews", reviewList);
+        responseMap.put("memberReviewCount", memberReviewCount);
         return ResponseEntity.ok(new ResponseDTO(200, "리뷰 조회 성공", responseMap));
     }
 
@@ -119,7 +127,7 @@ public class ReviewController {
 
 
     // 리뷰 수정
-@PreAuthorize("hasAuthority('USER')")
+//@PreAuthorize("hasAuthority('USER')")
 @Operation(summary = "updateReview", description = "리뷰 수정")
 @PutMapping("/update/{reviewNo}")
 public ResponseEntity<ResponseDTO> updateReview(@PathVariable Long reviewNo, @RequestBody ReviewDTO reviewDTO) {
@@ -135,7 +143,7 @@ public ResponseEntity<ResponseDTO> updateReview(@PathVariable Long reviewNo, @Re
 
 
     // 리뷰 삭제
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "deleteReview", description = "리뷰 삭제")
     @DeleteMapping("/{reviewNo}")
     public ResponseEntity<ResponseDTO> deleteReview(@PathVariable Long reviewNo) {
