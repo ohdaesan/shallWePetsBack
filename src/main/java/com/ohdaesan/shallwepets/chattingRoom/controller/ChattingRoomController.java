@@ -39,4 +39,15 @@ public class ChattingRoomController {
         return ResponseEntity.ok(messages);
     }
 
+    @PostMapping("/save")
+    public ResponseEntity<MessageEntity> saveMessage(
+            @RequestParam Long memberNo,
+            @RequestParam Long chattingRoomNo,
+            @RequestParam String content) {
+        MessageEntity message = chattingRoomService.saveMessage(memberNo, chattingRoomNo, content);
+        return ResponseEntity.ok(message);
+    }
+
+
+
 }

@@ -28,24 +28,6 @@ public class ChattingRoomService {
         this.memberService = memberService;
     }
 
-//    // 메시지를 저장하는 메서드 추가
-//    public MessageEntity saveMessage(Long memberNo, Long chattingRoomNo, String content) {
-//        // ChattingRoom 및 Member를 조회
-//        ChattingRoomEntity chattingRoom = chattingRoomRepository.findById(chattingRoomNo)
-//                .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
-//
-////        Member member = messageService.findById(memberNo); // MessageService를 통해 조회
-//
-//        // 메시지 엔티티 생성 및 저장
-//        MessageEntity message = MessageEntity.builder()
-//                .chattingRoom(chattingRoom)
-//                .memberNo(memberNo)
-//                .content(content)
-//                .createdTime(LocalDateTime.now())
-//                .build();
-//
-//        return messageRepository.save(message);
-//    }
 
     // 메시지를 저장하는 메서드
     public MessageEntity saveMessage(Long memberNo, Long chattingRoomNo, String content) {
@@ -65,19 +47,6 @@ public class ChattingRoomService {
     }
 
 
-//    // 채팅방 번호로 메시지 리스트 가져오기
-//    public List<MessageDTO> getMessagesByChattingRoomNo(Long chattingRoomNo) {
-//        return messageRepository.findByChattingRoom_ChattingRoomNo(chattingRoomNo)
-//                .stream()
-//                .map(messageEntity -> new MessageDTO(
-//                        messageEntity.getMessageNo(),
-//                        messageEntity.getChattingRoom().getChattingRoomNo(),
-//                        messageEntity.getMember().getMemberNo(),
-//                        messageEntity.getContent(),
-//                        messageEntity.getCreatedTime()
-//                ))
-//                .collect(Collectors.toList());
-//    }
 
     // 채팅방 번호로 메시지 리스트 가져오기
     public List<MessageDTO> getMessagesByChattingRoomNo(Long chattingRoomNo) {

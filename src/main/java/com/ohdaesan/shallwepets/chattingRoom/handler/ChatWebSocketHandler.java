@@ -35,19 +35,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         System.out.println("새로운 WebSocket 연결: " + session.getId());
     }
 
-    // 클라이언트로부터 메시지를 수신할 때 호출
-//    @Override
-//    public void handleMessage(WebSocketSession session, TextMessage message) throws Exception {
-//        String payload = message.getPayload();
-//        System.out.println("수신된 메시지: " + payload);
-//
-//        // 클라이언트로부터 받은 메시지를 연결된 모든 세션에 브로드캐스트
-//        for (WebSocketSession wsSession : sessions.values()) {
-//            if (wsSession.isOpen()) {
-//                wsSession.sendMessage(new TextMessage(payload));
-//            }
-//        }
-//    }
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
@@ -63,9 +50,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             }
         }
     }
-
-
-
 
     // 연결이 종료될 때 호출
     @Override

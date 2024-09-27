@@ -17,11 +17,11 @@ import java.util.Optional;
 public class MessageService {
     private final MessageRepository messageRepository;
 
-    // 메시지 ID로 조회하는 메서드
-    public MessageEntity findById(Long messageNo) {
-        return messageRepository.findById(messageNo)
-                .orElseThrow(() -> new RuntimeException("메시지를 찾을 수 없습니다."));
-    }
+//    // 메시지 ID로 조회하는 메서드
+//    public MessageEntity findById(Long messageNo) {
+//        return messageRepository.findById(messageNo)
+//                .orElseThrow(() -> new RuntimeException("메시지를 찾을 수 없습니다."));
+//    }
 
     // 메시지를 저장하는 메서드 추가
     public MessageEntity saveMessage(MessageEntity message) {
