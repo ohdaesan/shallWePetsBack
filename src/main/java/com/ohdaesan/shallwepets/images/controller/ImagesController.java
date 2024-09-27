@@ -9,9 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,16 +26,17 @@ public class ImagesController {
     private final S3Service s3Service;
 
     @PostMapping("/upload")
-    public ResponseEntity<ResponseDTO> uploadFile(ImagesDTO imagesDTO) {
+    public ResponseEntity<ResponseDTO> uploadFile(MultipartFile file) {
         Map<String, String> map = null;
 
         try {
-            map = s3Service.uploadFile(imagesDTO.getFile());
+            map = s3Service.uploadFile(file);
 
             String imageUrl = map.get("imageUrl");
             String imageOrigName = map.get("imageOrigName");
             String imageSavedName = map.get("imageSavedName");
 
+            ImagesDTO imagesDTO = new ImagesDTO();
             imagesDTO.setImageUrl(imageUrl);
             imagesDTO.setImageOrigName(imageOrigName);
             imagesDTO.setImageSavedName(imageSavedName);
