@@ -29,9 +29,9 @@ public class BookmarkService {
     public BookmarkDTO createBookmark(BookmarkDTO bookmarkDTO) {
         // member와 post 엔티티 가져오기
         Member member = memberRepository.findById(bookmarkDTO.getMemberNo())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid memberNo"));
+                .orElseThrow(() -> new IllegalStateException("로그인 후 이용해주세요"));
         Post post = postRepository.findById(bookmarkDTO.getPostNo())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid postNo"));
+                .orElseThrow(() -> new IllegalArgumentException("해당 post가 없습니다"));
 
         // 해당 memberNo와 postNo에 대한 기존 북마크 확인
         boolean exists = bookmarkRepository.existsByMemberAndPost(member, post);
@@ -55,7 +55,7 @@ public class BookmarkService {
     }
 
 
-    // Get all bookmarks by memberNo
+    // 멤버로 북마크 조회
     public List<BookmarkDTO> getBookmarksByMember(Long memberNo) {
         // memberNo로 북마크 목록 조회
 //        List<Bookmark> bookmarks = bookmarkRepository.findByMember(memberNo); // 회원에 따른 북마크 목록을 조회하는 메서드가 필요합니다.

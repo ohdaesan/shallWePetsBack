@@ -62,7 +62,7 @@ public class BookmarkController {
         if (deleteBookmark.isEmpty()) {
             // Bookmark not found case
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseDTO(404, "북마크를 삭제할 수 없습니다.", responseMap));
+                    .body(new ResponseDTO(404, "해당 북마크를 삭제할 수 없습니다. 북마크가 되어있는지 확인해주세요.", responseMap));
         }
 
         // Bookmark deleted successfully case
