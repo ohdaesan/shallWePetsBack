@@ -111,4 +111,12 @@ public class MemberService {
     public boolean existsPhone(String memberPhone) {
         return memberRepository.existsByMemberPhone(memberPhone);
     }
+
+    // memberNo로 Member 조회 채팅 기능에서 사용하려고 생성(by 이득규)
+    public Member findById(Long memberNo) {
+        return memberRepository.findById(memberNo)
+                .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+    }
+
+
 }
