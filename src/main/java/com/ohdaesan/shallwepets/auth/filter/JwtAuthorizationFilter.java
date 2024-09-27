@@ -65,6 +65,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/checkSms",
                 "/uploadFile",
                 "/images/upload",
+                "/images/findImageByNo",
                 "/import-csv",
                 "/post/(.*)",
                 "/review/(.*)",
