@@ -113,6 +113,23 @@ public class MemberController {
         }
     }
 
+    @PostMapping("/findGrade")
+    public ResponseEntity<ResponseDTO> findGradeByMemberNo(@RequestBody Map<String, String> params) {
+        Map<String, String> response = new HashMap<>();
+
+        Long memberNo = Long.valueOf(params.get("memberNo"));
+
+        try {
+            String memberGrade = memberService.findGradeByMemberNo(memberNo);
+            response.put("grade", memberGrade);
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "회원 등급 찾기 성공", response));
+        } catch (NoSuchElementException e) {
+            response.put("error", "회원 등급을 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "회원 등급 찾기 실패", response));
+        }
+    }
+
     @PostMapping("/changePwdNotLoggedIn")
     public ResponseEntity<ResponseDTO> changePwNotLoggedIn(@RequestBody Map<String, String> params) {
         Map<String, String> response = new HashMap<>();
