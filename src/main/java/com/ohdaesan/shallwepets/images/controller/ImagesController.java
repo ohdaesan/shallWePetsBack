@@ -68,4 +68,34 @@ public class ImagesController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "이미지 찾기 실패", response));
         }
     }
+
+    @DeleteMapping("/deleteImageByNo")
+    public ResponseEntity<ResponseDTO> deleteImageByNo(@RequestBody Map<String, String> params) {
+        Long imageNo = Long.valueOf(params.get("imageNo"));
+
+        try {
+            Images image = imagesService.findImagesByImageNo(imageNo);
+
+            // 삭제하려는 이미지를 참조하는 reference 제거
+            imagesService.clearImageReferences(imageNo);
+
+            // S3에서 삭제
+            s3Service.deleteFile(image.getImageSavedName());
+
+            // DB에서도 삭제
+            imagesService.delete(imageNo);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("success", "이미지 삭제 성공");
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 삭제 성공", response));
+        } catch (NoSuchElementException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "해당 번호의 이미지를 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "이미지 삭제 실패", response));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, "S3 파일 삭제 실패", null));
+        }
+    }
 }
