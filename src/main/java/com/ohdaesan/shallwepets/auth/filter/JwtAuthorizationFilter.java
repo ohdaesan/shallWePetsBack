@@ -76,7 +76,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/v3/api-docs",              // swagger 설정
                 "/v3/api-docs/(.*)",         // swagger 설정
                 "/swagger-resources",        // swagger 설정
-                "/swagger-resources/(.*)"    // swagger 설정
+                "/swagger-resources/(.*)",    // swagger 설정
+                "/ws/(.*)"
+
         );
         /*
         * 정규표현식 패턴
