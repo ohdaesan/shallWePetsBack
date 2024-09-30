@@ -53,6 +53,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/member/register",          // 회원가입 시 토큰이 없어도 요청 가능하게
                 "/member/findId",
                 "/member/findPwd",
+                "/member/findNickname",
+                "/member/findGrade",
                 "/member/changePwdNotLoggedIn",
                 "/member/checkId",
                 "/member/checkNickname",
@@ -63,6 +65,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/checkSms",
                 "/uploadFile",
                 "/images/upload",
+                "/images/findImageByNo",
+                "/images/deleteImageByNo",
                 "/import-csv",
                 "/post/(.*)",
                 "/review/(.*)",
@@ -71,6 +75,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/bookmark/(.*)/(.*)",
                 "/bookmark/delete",
                 "/points/(.*)",
+                "/select_location",
                 "/swagger-ui/(.*)",          // swagger 설정
                 "/swagger-ui/index.html",    // swagger 설정
                 "/v3/api-docs",              // swagger 설정

@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import java.io.IOException;
 @Service
 @RequiredArgsConstructor
 public class S3Service {
+    private final AmazonS3Client amazonS3Client;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
@@ -50,6 +52,14 @@ public class S3Service {
         map.put("imageSavedName", uniqueFileName);
 
         return map;
+    }
+
+    public void deleteFile(String fileName) throws IOException {
+        try {
+            amazonS3Client.deleteObject(bucket, fileName);
+        } catch (SdkClientException e) {
+            throw new IOException("S3 파일 삭제 실패", e);
+        }
     }
 
     private String generateUniqueFileName(String originalFileName) {

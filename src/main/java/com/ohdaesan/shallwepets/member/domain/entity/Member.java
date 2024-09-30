@@ -1,7 +1,6 @@
 package com.ohdaesan.shallwepets.member.domain.entity;
 
 import com.ohdaesan.shallwepets.images.domain.entity.Images;
-import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,5 +46,7 @@ public class Member {
     @JoinColumn(name = "image_no")
     private Images image;
 
-
+    public void setImage(Images image) {
+        this.image = image;
+    }
 }
