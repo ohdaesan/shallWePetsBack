@@ -11,6 +11,7 @@ import com.ohdaesan.shallwepets.review.domain.entity.ReviewImages;
 import com.ohdaesan.shallwepets.review.repository.ReviewImagesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public class ImagesService {
     private final MemberRepository memberRepository;
     private final PostImagesRepository postimagesRepository;
     private final ReviewImagesRepository reviewimagesRepository;
+
+    private final ModelMapper modelMapper;
 
     public Images save(ImagesDTO imagesDTO) {
         Images image = new Images(imagesDTO.getImageUrl(), imagesDTO.getImageOrigName(), imagesDTO.getImageSavedName());
@@ -58,5 +61,10 @@ public class ImagesService {
         // ReviewImage에서 refer하는 Image reference 제거
         List<ReviewImages> reviewImages = reviewimagesRepository.findByImage_ImageNo(imageNo);
         reviewimagesRepository.deleteAll(reviewImages);
+    }
+
+    public void updateImage(ImagesDTO imagesDTO) {
+        Images image = modelMapper.map(imagesDTO, Images.class);
+        imagesRepository.save(image);
     }
 }
