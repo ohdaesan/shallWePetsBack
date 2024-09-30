@@ -45,4 +45,8 @@ public class Member {
     @OneToOne
     @JoinColumn(name = "image_no")
     private Images image;
+
+    public void setImage(Images image) {
+        this.image = image;
+    }
 }

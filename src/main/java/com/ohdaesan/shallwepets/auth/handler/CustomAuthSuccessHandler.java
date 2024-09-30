@@ -46,9 +46,10 @@ public class CustomAuthSuccessHandler extends SavedRequestAwareAuthenticationSuc
         Map<String, Object> responseMap = new HashMap<>();
 //        responseMap.put("userInfo", jsonValue);
         responseMap.put("memberNo", member.getMemberNo());
+        responseMap.put("memberGrade", member.getGrade().toString());
         responseMap.put("memberNickname", member.getMemberNickname());
         responseMap.put("message", "로그인 성공");
-        responseMap.put("token", token);
+        responseMap.put("token", AuthConstants.TOKEN_TYPE + " " + token);
 
         // 헤더에 토큰 담기
         response.addHeader(AuthConstants.AUTH_HEADER, AuthConstants.TOKEN_TYPE + " " + token);

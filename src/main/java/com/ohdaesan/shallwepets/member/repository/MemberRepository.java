@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -29,4 +30,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Transactional
     @Query("UPDATE Member m SET m.memberPwd = :modifiedPw WHERE m.memberId = :memberId")
     int updateMemberPwByMemberId(String memberId, String modifiedPw);
+
+    List<Member> findByImage_ImageNo(Long imageNo);
 }
