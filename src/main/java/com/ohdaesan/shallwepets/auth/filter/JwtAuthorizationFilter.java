@@ -69,8 +69,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/post/(.*)",
                 "/review/(.*)",
                 "/review/(.*)/(.*)",
-                "/bookmark/(.*)",
-                "/bookmark/(.*)/(.*)",
+//                "/bookmark/(.*)",
+//                "/bookmark/(.*)/(.*)",
                 "/bookmark/delete",
                 "/points/(.*)",
                 "/swagger-ui/(.*)",          // swagger 설정

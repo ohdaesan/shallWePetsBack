@@ -128,17 +128,21 @@ public class ReviewController {
 
     // 리뷰 수정
 //@PreAuthorize("hasAuthority('USER')")
-@Operation(summary = "updateReview", description = "리뷰 수정")
-@PutMapping("/update/{reviewNo}")
-public ResponseEntity<ResponseDTO> updateReview(@PathVariable Long reviewNo, @RequestBody ReviewDTO reviewDTO) {
-    ReviewDTO updatedReview = reviewService.updateReview(reviewNo, reviewDTO);
+    @PutMapping("/{reviewNo}")
+    public ResponseEntity<ResponseDTO> updateReview(@PathVariable Long reviewNo, @RequestBody ReviewDTO reviewDTO) {
+        System.out.println("🍔🍔🍔🍔🍔 reviewNo: " + reviewNo); // reviewNo 로그 추가
+        System.out.println("🍔🍔🍔🍔🍔reviewDTO: " + reviewDTO);
+        // reviewDTO의 rate와 content를 로그로 확인
+        System.out.println("Rate: " + reviewDTO.getRate() + ", Content: " + reviewDTO.getContent());
 
-    Map<String, Object> responseMap = new HashMap<>();
-    responseMap.put("review", updatedReview);
+        ReviewDTO updatedReview = reviewService.updateReview(reviewNo, reviewDTO);
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("review", updatedReview);
 
-    return ResponseEntity.ok()
-            .body(new ResponseDTO(200, "리뷰 수정 성공", responseMap));
-}
+        return ResponseEntity.ok()
+                .body(new ResponseDTO(200, "리뷰 수정 성공", responseMap));
+    }
+
 
 
 
