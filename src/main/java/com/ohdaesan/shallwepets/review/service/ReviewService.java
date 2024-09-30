@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -111,9 +112,16 @@ public class ReviewService {
 
     // 포스트 넘버로 조회
     @Transactional(readOnly = true)
-    public List<ReviewDTO> getReviewsByPostNo(Long postNo) {
+    public List<ReviewDTO> getReviewsByPostNo(Long postNo, String sortOrder) {
         // 포스트 번호로 리뷰를 데이터베이스에서 가져오기
         List<Review> reviews = reviewRepository.findByPost_PostNo(postNo);
+
+        // 정렬: 최신순(recent) 또는 오래된 순서(old)
+        if ("old".equals(sortOrder)) {
+            reviews.sort(Comparator.comparing(Review::getCreatedDate)); // 오래된 순서로 정렬
+        } else {
+            reviews.sort(Comparator.comparing(Review::getCreatedDate).reversed()); // 최신 순서로 정렬
+        }
 
         // 엔티티를 DTO로 변환
         List<ReviewDTO> reviewDTOs = new ArrayList<>();
@@ -121,6 +129,8 @@ public class ReviewService {
         for (Review review : reviews) {
             ReviewDTO reviewDTO = new ReviewDTO();
             reviewDTO.setReviewNo(review.getReviewNo());
+            reviewDTO.setMemberNo(review.getMember().getMemberNo());
+            reviewDTO.setPostNo(review.getPost().getPostNo());
             reviewDTO.setContent(review.getContent());
             reviewDTO.setRate(review.getRate());
             reviewDTO.setCreatedDate(review.getCreatedDate());
