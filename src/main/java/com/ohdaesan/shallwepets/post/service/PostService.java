@@ -68,4 +68,8 @@ public class PostService {
     public List<Post> getPostsByCategoryAndCities(String category, List<String> city) {
         return postRepository.findByCtgryTwoNmAndCtyprvnNmIn(category, city);
     }
+
+    public List<String> getDistinctSignguByCitiesAndCategory(List<String> cities, String category) {
+        return postRepository.findDistinctSignguByCtyprvnNmAndCtgryTwoNm(cities, category);
+    }
 }
