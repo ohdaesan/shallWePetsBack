@@ -10,8 +10,8 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    List<Post> findByCtgryTwoNmAndCtyprvnNmIn(String ctgryTwoNm, List<String> ctyprvnNms);
+    List<Post> findByCtgryTwoNmAndCtyprvnNmContains(String ctgryTwoNm, String ctyprvnNm);
 
-    @Query("SELECT DISTINCT p.signguNm FROM Post p WHERE p.ctyprvnNm IN :cities AND p.ctgryTwoNm = :category")
-    List<String> findDistinctSignguByCtyprvnNmAndCtgryTwoNm(@Param("cities") List<String> cities, @Param("category") String category);
+    @Query("SELECT DISTINCT p.signguNm FROM Post p WHERE p.ctyprvnNm LIKE CONCAT('%', :city, '%') AND p.ctgryTwoNm = :category")
+    List<String> findDistinctSignguByCtyprvnNmContainsAndCtgryTwoNm(@Param("city") String city, @Param("category") String category);
 }

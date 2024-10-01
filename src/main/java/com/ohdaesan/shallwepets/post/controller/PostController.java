@@ -37,7 +37,6 @@ public class PostController {
         return ResponseEntity
                 .ok()
                 .body(new ResponseDTO(201, "post 불러오기 성공", responseMap));
-
     }
 
     @Operation(summary = "장소 리스트 조회", description = "특정 카테고리와 도시로 포스트 리스트 불러오기")
