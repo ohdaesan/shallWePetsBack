@@ -1,6 +1,5 @@
 package com.ohdaesan.shallwepets.post.service;
 
-import com.ohdaesan.shallwepets.member.repository.MemberRepository;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
@@ -8,16 +7,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PostService {
     private final PostRepository postRepository;
-
-
 
     public PostDTO getPostDetails(Long postNo) {
         Post post = postRepository.findById(postNo)
@@ -65,11 +64,25 @@ public class PostService {
 
     }
 
-    public List<Post> getPostsByCategoryAndCities(String category, List<String> city) {
-        return postRepository.findByCtgryTwoNmAndCtyprvnNmIn(category, city);
+    public List<Post> getPostsByCategoryAndCities(String category, List<String> cities) {
+        Set<Post> postsSet = new HashSet<>();
+
+        for (String city : cities) {
+            List<Post> posts = postRepository.findByCtgryTwoNmAndCtyprvnNmContains(category, city);
+            postsSet.addAll(posts);
+        }
+
+        return new ArrayList<>(postsSet);
     }
 
     public List<String> getDistinctSignguByCitiesAndCategory(List<String> cities, String category) {
-        return postRepository.findDistinctSignguByCtyprvnNmAndCtgryTwoNm(cities, category);
+        Set<String> signguSet = new HashSet<>();
+
+        for (String city : cities) {
+            List<String> signgus = postRepository.findDistinctSignguByCtyprvnNmContainsAndCtgryTwoNm(city, category);
+            signguSet.addAll(signgus);
+        }
+
+        return new ArrayList<>(signguSet);
     }
 }
