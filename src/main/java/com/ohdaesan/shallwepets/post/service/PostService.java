@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -63,4 +65,7 @@ public class PostService {
 
     }
 
+    public List<Post> getPostsByCategoryAndCities(String category, List<String> city) {
+        return postRepository.findByCtgryTwoNmAndCtyprvnNmIn(category, city);
+    }
 }
