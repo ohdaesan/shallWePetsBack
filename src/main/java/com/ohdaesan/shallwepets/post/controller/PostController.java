@@ -58,4 +58,19 @@ public class PostController {
                 .ok()
                 .body(new ResponseDTO(200, "포스트 리스트 조회 성공", responseMap));
     }
+
+    @Operation(summary = "특정 도시의 구 리스트 조회", description = "주어진 도시에 따라 시군구 리스트 반환")
+    @GetMapping("/getSigngu")
+    public ResponseEntity<ResponseDTO> getDistinctSignguByCities(
+            @RequestParam List<String> cities,
+            @RequestParam String category) {
+        List<String> signguList = postService.getDistinctSignguByCitiesAndCategory(cities, category);
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("signguList", signguList);
+
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO(200, "시군구 리스트 조회 성공", responseMap));
+    }
 }
