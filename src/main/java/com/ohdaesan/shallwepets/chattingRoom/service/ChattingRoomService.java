@@ -62,4 +62,19 @@ public class ChattingRoomService {
                 .collect(Collectors.toList());
     }
 
+    public Long createChattingRoom(Long member1No, Long member2No) {
+        Member member1 = memberService.findById(member1No);
+        Member member2 = memberService.findById(member2No);
+
+        // 새로운 채팅방 엔티티 생성
+        ChattingRoomEntity newChattingRoom = ChattingRoomEntity.builder()
+                .member1(member1)
+                .member2(member2)
+                .build();
+
+        // 채팅방 저장
+        ChattingRoomEntity savedChattingRoom = chattingRoomRepository.save(newChattingRoom);
+
+        return savedChattingRoom.getChattingRoomNo(); // 채팅방 번호 반환
+    }
 }

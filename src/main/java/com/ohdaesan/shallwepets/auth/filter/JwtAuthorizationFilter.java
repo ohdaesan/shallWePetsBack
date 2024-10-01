@@ -76,8 +76,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/v3/api-docs",              // swagger 설정
                 "/v3/api-docs/(.*)",         // swagger 설정
                 "/swagger-resources",        // swagger 설정
-                "/swagger-resources/(.*)",    // swagger 설정
-                "/ws/(.*)"
+                "/swagger-resources/(.*)"    // swagger 설정
+//                "/ws/(.*)"
 
         );
         /*
@@ -108,6 +108,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         // 헤더에서 토큰 꺼내기
         String header = request.getHeader(AuthConstants.AUTH_HEADER);
+
 
         // 유효한 토큰인지 확인
         try {
