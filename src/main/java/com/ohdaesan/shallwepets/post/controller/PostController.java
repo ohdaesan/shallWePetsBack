@@ -39,6 +39,40 @@ public class PostController {
                 .body(new ResponseDTO(201, "post 불러오기 성공", responseMap));
     }
 
+
+    // user의 업체 등록 신청
+//    @PreAuthorize("hasAuthority('USER')")
+    @Operation(summary = "업체 등록", description = "user의 업체 등록")
+    @PostMapping("/registerPost")
+    public ResponseEntity<ResponseDTO> registerPost(@RequestBody PostDTO postDTO) {
+        PostDTO post = postService.registerPost(postDTO);
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("post", post);
+
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO(201, "업체 등록 신청 성공", responseMap));
+    }
+
+    // 전체 폼 List 조회 (front에서 memberNo,awaiting)
+    // 리뷰 전체 조회
+//    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @Operation(summary = "post 전체 조회", description = "post 전체 조회")
+    @GetMapping("/getAllPost")
+    public ResponseEntity<ResponseDTO> getAllPost(@RequestBody PostDTO postDTO) {
+        List<PostDTO> postList = postService.getAllPost();
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("postList", postList);
+
+        return ResponseEntity.ok()
+                .body(new ResponseDTO(200, "post 전체 조회 성공", responseMap));
+    }
+
+    // 관리자의 폼 수정[반려 or 승인](상태 변경+ 반려사유)
+
+    // 신청자의 반려당한 이후 폼 수정
+
+
     @Operation(summary = "장소 리스트 조회", description = "특정 카테고리와 도시로 포스트 리스트 불러오기")
     @GetMapping("/getList")
     public ResponseEntity<ResponseDTO> getPostsByCategoryAndCities(
