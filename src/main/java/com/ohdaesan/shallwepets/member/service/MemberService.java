@@ -112,4 +112,8 @@ public class MemberService {
         return memberRepository.findById(memberNo)
                 .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
     }
+
+    public Long findImageNoById (Long memberNo) {
+        return memberRepository.findImageNoByMemberNo(memberNo);
+    }
 }

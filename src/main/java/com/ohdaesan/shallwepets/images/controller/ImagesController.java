@@ -5,6 +5,7 @@ import com.ohdaesan.shallwepets.images.domain.entity.Images;
 import com.ohdaesan.shallwepets.images.service.S3Service;
 import com.ohdaesan.shallwepets.images.domain.dto.ImagesDTO;
 import com.ohdaesan.shallwepets.images.service.ImagesService;
+import com.ohdaesan.shallwepets.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.util.NoSuchElementException;
 @RequestMapping("/images")
 public class ImagesController {
     private final ImagesService imagesService;
+    private final MemberService memberService;
     private final S3Service s3Service;
 
     @Operation(summary = "이미지 파일 업로드", description = "이미지 AWS 서버에 업로드")
@@ -128,5 +130,32 @@ public class ImagesController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Operation(summary = "회원 번호로 프로필 이미지 가져오기", description = "회원 번호로 프로필 이미지 가져오기")
+    @GetMapping("/getImageNoByMemberNo/{memberNo}")
+    public ResponseEntity<ResponseDTO> getImageByMemberNo(@PathVariable Long memberNo) {
+        Long imageNo = memberService.findImageNoById(memberNo);
+
+        if (imageNo == null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "사진을 등록하지 않은 사용자입니다.");
+
+            return ResponseEntity.ok().body(new ResponseDTO(HttpStatus.NOT_FOUND, "사진을 등록하지 않은 사용자입니다.", response));
+        }
+
+        Images image = imagesService.findImagesByImageNo(imageNo);
+
+        if (image == null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "이미지 찾기에 실패하였습니다.");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "이미지 찾기 실패", response));
+        }
+
+        Map<String, Images> response = new HashMap<>();
+        response.put("image", image);
+
+        return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 조회 성공", response));
     }
 }

@@ -37,7 +37,7 @@ public class ReviewService {
     private final PointService pointService;
 
     @Transactional
-    public void createReview(ReviewDTO reviewDTO) {
+    public Long createReview(ReviewDTO reviewDTO) {
         // Member와 Post는 외부에서 매핑된 엔티티이므로, ID를 통해 직접 조회해 설정해줍니다.
         Member member = memberRepository.findById(reviewDTO.getMemberNo())
                 .orElseThrow(() -> new IllegalArgumentException("해당 번호의 회원이 존재하지 않습니다."));
@@ -55,7 +55,7 @@ public class ReviewService {
                 .modifiedDate(null)     // 처음 생성 시 수정 날짜는 null
                 .build();
 
-        reviewRepository.save(review);
+        Review review1 = reviewRepository.save(review);
 
         // Review 엔티티를 데이터베이스에 저장
         Point point = Point.builder()
@@ -69,6 +69,8 @@ public class ReviewService {
 
         // 등급 업그레이드 대상인지 확인 후 등급 업데이트
         updateMemberGrade(review, member);
+
+        return review1.getReviewNo();
     }
 
     @Transactional(readOnly = true)
