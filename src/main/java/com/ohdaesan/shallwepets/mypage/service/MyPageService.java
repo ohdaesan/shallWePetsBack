@@ -5,13 +5,13 @@ import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
 import com.ohdaesan.shallwepets.mypage.domain.dto.ChangePasswordDTO;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -27,8 +27,8 @@ public class MyPageService {
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg", "gif");
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-    public MemberDTO getMemberInfo(String memberId) {
-        Member member = memberRepository.findByMemberId(memberId);
+    public MemberDTO getMemberInfo(Long memberNo) {
+        Member member = memberRepository.findByMemberNo(memberNo);
         if (member == null) {
             throw new NoSuchElementException("회원을 찾을 수 없습니다.");
         }
@@ -36,39 +36,62 @@ public class MyPageService {
     }
 
     @Transactional
-    public MemberDTO updateMemberInfo(String memberId, MemberDTO updatedMemberDTO) {
-        Member existingMember = memberRepository.findByMemberId(memberId);
+    public MemberDTO updateMemberInfo(Long memberNo, MemberDTO updatedMemberDTO) {
+        // 회원 정보 조회
+        Member existingMember = memberRepository.findByMemberNo(memberNo);
         if (existingMember == null) {
             throw new NoSuchElementException("회원을 찾을 수 없습니다.");
         }
 
-        // 아이디 길이 검증
-        if (updatedMemberDTO.getMemberId().length() >= 20) {
-            throw new IllegalArgumentException("아이디는 20자 미만이어야 합니다.");
+        // 로깅: 기존 회원 정보 출력
+        log.info("기존 회원 정보: {}", existingMember);
+
+        // 기존 멤버의 필드 수정: null 체크 추가
+        if (updatedMemberDTO.getMemberNickname() != null) {
+            existingMember.setMemberNickname(updatedMemberDTO.getMemberNickname());
+        }
+        if (updatedMemberDTO.getMemberName() != null) {
+            existingMember.setMemberName(updatedMemberDTO.getMemberName());
+        }
+        if (updatedMemberDTO.getMemberEmail() != null) {
+            existingMember.setMemberEmail(updatedMemberDTO.getMemberEmail());
+        }
+        if (updatedMemberDTO.getMemberPhone() != null) {
+            existingMember.setMemberPhone(updatedMemberDTO.getMemberPhone());
+        }
+        if (updatedMemberDTO.getMemberDob() != null) {
+            existingMember.setMemberDob(updatedMemberDTO.getMemberDob());
+        }
+        if (updatedMemberDTO.getMemberRoadAddress() != null) {
+            existingMember.setMemberRoadAddress(updatedMemberDTO.getMemberRoadAddress());
+        }
+        if (updatedMemberDTO.getMemberDetailAddress() != null) {
+            existingMember.setMemberDetailAddress(updatedMemberDTO.getMemberDetailAddress());
         }
 
-        // 업데이트할 필드만 변경
-        Member updatedMember = Member.builder()
-                .memberId(existingMember.getMemberId())
-                .memberPwd(existingMember.getMemberPwd())
-                .memberNickname(updatedMemberDTO.getMemberNickname())
-                .memberName(updatedMemberDTO.getMemberName())
-                .memberEmail(updatedMemberDTO.getMemberEmail())
-                .memberPhone(updatedMemberDTO.getMemberPhone())
-                .memberDob(updatedMemberDTO.getMemberDob())
-                .memberAddress(updatedMemberDTO.getMemberAddress())
-                .image(existingMember.getImage()) // 기존 이미지를 그대로 사용
-                .build();
+        // 로깅: 업데이트할 내용 출력
+        log.info("업데이트할 회원 정보: {}", updatedMemberDTO);
 
-        Member savedMember = memberRepository.save(updatedMember);
+        // 기존 멤버 객체를 저장 (수정된 내용만 업데이트됨)
+        Member savedMember = memberRepository.save(existingMember);
+
+        // 로깅: 저장된 회원 정보 출력
+        log.info("업데이트 완료된 회원 정보: {}", savedMember);
+
+        // DTO로 매핑하여 반환
         return modelMapper.map(savedMember, MemberDTO.class);
     }
 
     @Transactional
-    public String uploadProfilePicture(String memberId, MultipartFile file) throws IOException {
-        Member member = memberRepository.findByMemberId(memberId);
+    public String uploadProfilePicture(Long memberNo, MultipartFile file) throws IOException {
+        Member member = memberRepository.findByMemberNo(memberNo);
         if (member == null) {
             throw new NoSuchElementException("회원을 찾을 수 없습니다.");
+        }
+
+        // 파일 이름이 null인지 확인
+        if (file == null || file.getOriginalFilename() == null) {
+            throw new IllegalArgumentException("파일이 null이거나 파일 이름이 존재하지 않습니다.");
         }
 
         // 파일 확장자 검증
@@ -84,7 +107,8 @@ public class MyPageService {
 
         // 파일 저장 로직 (로컬 파일 시스템에 저장)
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();  // 파일명에 현재 시간을 추가하여 유니크한 이름 생성
-        String filePath = "path/to/save/" + fileName;  // 실제 저장 경로로 변경해야 합니다.
+        String filePath = "src/main/resources/static/images/" + fileName;  // 저장 경로를 src/main/resources/static/images로 변경
+
 
         // 파일 저장 (예: 파일 시스템에 저장)
         java.nio.file.Path path = java.nio.file.Paths.get(filePath);
@@ -94,16 +118,16 @@ public class MyPageService {
         Images image = member.getImage();
         if (image == null) {
             image = Images.builder()
-                    .imageName(file.getOriginalFilename())       // 원본 파일명
-                    .imageSavedName(fileName)                    // 저장된 파일명
-                    .imageSavedPath(filePath)                    // 저장된 파일 경로
-                    .imageUrl("/images/" + fileName)             // URL 경로 (이 부분은 나중에 실제 서비스에 맞게 변경)
+                    .imageOrigName(file.getOriginalFilename())       // 원본 파일명
+                    .imageSavedName(fileName)                        // 저장된 파일명
+                    .imageSavedPath(filePath)                        // 저장된 파일 경로
+                    .imageUrl("/images/" + fileName)                // URL 경로 (이 부분은 나중에 실제 서비스에 맞게 변경)
                     .build();
         } else {
             // 기존 이미지 엔티티가 있을 경우 업데이트
             image = Images.builder()
                     .imageNo(image.getImageNo())
-                    .imageName(file.getOriginalFilename())
+                    .imageOrigName(file.getOriginalFilename())
                     .imageSavedName(fileName)
                     .imageSavedPath(filePath)
                     .imageUrl("/images/" + fileName)  // URL 경로는 실제 서비스에 맞게 수정
@@ -119,8 +143,10 @@ public class MyPageService {
                 .memberEmail(member.getMemberEmail())
                 .memberPhone(member.getMemberPhone())
                 .memberDob(member.getMemberDob())
-                .memberAddress(member.getMemberAddress())
+                .memberRoadAddress(member.getMemberRoadAddress())
+                .memberDetailAddress(member.getMemberDetailAddress())
                 .image(image)  // 이미지 엔티티 설정
+                .hasBusinessRegistered(member.isHasBusinessRegistered()) // 추가
                 .build();
 
         memberRepository.save(updatedMember);
@@ -149,8 +175,8 @@ public class MyPageService {
     }
 
     @Transactional
-    public void changePassword(String memberId, ChangePasswordDTO changePasswordDTO) {
-        Member member = memberRepository.findByMemberId(memberId);
+    public void changePassword(Long memberNo, ChangePasswordDTO changePasswordDTO) {
+        Member member = memberRepository.findByMemberNo(memberNo);
         if (member == null) {
             throw new NoSuchElementException("회원을 찾을 수 없습니다.");
         }
@@ -180,11 +206,12 @@ public class MyPageService {
                 .memberEmail(member.getMemberEmail())
                 .memberPhone(member.getMemberPhone())
                 .memberDob(member.getMemberDob())
-                .memberAddress(member.getMemberAddress())
+                .memberRoadAddress(member.getMemberRoadAddress())
+                .memberDetailAddress(member.getMemberDetailAddress())
                 .image(member.getImage())
+                .hasBusinessRegistered(member.isHasBusinessRegistered()) // 추가
                 .build();
 
         memberRepository.save(updatedMember);
     }
 }
-

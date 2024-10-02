@@ -26,6 +26,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Member findByMemberId(String memberId);
 
+    Member findByMemberNo(Long memberNo);
+
     @Modifying
     @Transactional
     @Query("UPDATE Member m SET m.memberPwd = :modifiedPw WHERE m.memberId = :memberId")
