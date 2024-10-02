@@ -8,6 +8,7 @@ import lombok.*;
 @Setter
 @ToString
 public class PostImagesDTO {
+    private Long postImageNo;
     private Long postNo;
     private Long imageNo;
 }
