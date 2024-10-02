@@ -34,11 +34,12 @@ public class ReviewController {
     public ResponseEntity<ResponseDTO> createReview(@RequestBody ReviewDTO reviewDTO) {
 
         // ReviewService를 통해 리뷰 저장
-        reviewService.createReview(reviewDTO);
+        Long reviewNo = reviewService.createReview(reviewDTO);
 
         // 성공 메시지를 담은 응답 객체 생성
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("result", "리뷰 등록에 성공하였습니다.");
+        responseMap.put("reviewNo", reviewNo);
 
         // ResponseEntity를 사용해 HTTP 응답을 반환
         return ResponseEntity
