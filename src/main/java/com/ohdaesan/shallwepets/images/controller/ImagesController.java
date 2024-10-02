@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,9 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.time.LocalDateTime;
+import java.util.*;
 
 // Amazon S3 사용
 @Tag(name = "Images")
@@ -49,6 +47,7 @@ public class ImagesController {
             imagesDTO.setImageUrl(imageUrl);
             imagesDTO.setImageOrigName(imageOrigName);
             imagesDTO.setImageSavedName(imageSavedName);
+            imagesDTO.setCreatedDate(LocalDateTime.now());
 
             Images savedImage = imagesService.save(imagesDTO);
 
@@ -112,7 +111,7 @@ public class ImagesController {
     @Operation(summary = "이미지 파일 수정", description = "imageNo에 해당하는 이미지를 AWS 서버에서 수정")
     @PutMapping("/updateImageByNo")
     public ResponseEntity<ResponseDTO> updateFile(@RequestParam Long imageNo, MultipartFile file) {
-        Map<String, String> map = null;
+        Map<String, Object> map = null;
 
         try {
             map = s3Service.updateFile(imageNo, file);
@@ -120,9 +119,11 @@ public class ImagesController {
             ImagesDTO imagesDTO = new ImagesDTO();
 
             imagesDTO.setImageNo(imageNo);
-            imagesDTO.setImageOrigName(map.get("imageOrigName"));
-            imagesDTO.setImageSavedName(map.get("imageSavedName"));
-            imagesDTO.setImageUrl(map.get("imageUrl"));
+            imagesDTO.setImageOrigName(map.get("imageOrigName").toString());
+            imagesDTO.setImageSavedName(map.get("imageSavedName").toString());
+            imagesDTO.setImageUrl(map.get("imageUrl").toString());
+            imagesDTO.setCreatedDate((LocalDateTime) map.get("imageCreatedDate"));
+            imagesDTO.setModifiedDate(LocalDateTime.now());
 
             imagesService.updateImage(imagesDTO);
 
@@ -133,7 +134,7 @@ public class ImagesController {
     }
 
     @Operation(summary = "회원 번호로 프로필 이미지 가져오기", description = "회원 번호로 프로필 이미지 가져오기")
-    @GetMapping("/getImageNoByMemberNo/{memberNo}")
+    @GetMapping("/getImageByMemberNo/{memberNo}")
     public ResponseEntity<ResponseDTO> getImageByMemberNo(@PathVariable Long memberNo) {
         Long imageNo = memberService.findImageNoById(memberNo);
 
@@ -157,5 +158,33 @@ public class ImagesController {
         response.put("image", image);
 
         return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 조회 성공", response));
+    }
+
+    @Operation(summary = "포스트 번호로 관련 이미지들 가져오기", description = "포스트 번호로 관련 이미지들 가져오기")
+    @PostMapping("/getImagesByPostNo")
+    public ResponseEntity<ResponseDTO> getImagesByPostNo(@RequestBody Map<String, String> params) {
+        Long postNo = Long.valueOf(params.get("postNo"));
+        int limit = Integer.parseInt(params.get("limit"));
+
+        List<Images> images = imagesService.getImagesByPostNo(postNo);
+
+        Map<String, Object> response = new HashMap<>();
+
+        if (images.isEmpty()) {
+            response.put("error", "포스트와 관련된 이미지가 존재하지 않음");
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 조회 성공", response));
+        } else {
+            images.sort(Comparator.comparing(Images::getCreatedDate).reversed());
+
+            if (limit > 0) {    // limit 길이만큼의 이미지 리스트 반환
+                List<Images> sizeLimitImages = images.size() > limit ? images.subList(0, limit) : images;
+                response.put("imageList", sizeLimitImages);
+            } else {            // -1이면 전체 리스트 반환
+                response.put("imageList", images);
+            }
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 조회 성공", response));
+        }
     }
 }

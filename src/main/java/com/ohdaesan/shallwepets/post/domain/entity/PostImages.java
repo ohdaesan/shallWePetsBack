@@ -16,7 +16,11 @@ import lombok.NoArgsConstructor;
 public class PostImages {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postNo;
+    private Long postImageNo;
+
+    @ManyToOne
+    @JoinColumn(name = "post_no", nullable = false)
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "image_no", nullable = false)

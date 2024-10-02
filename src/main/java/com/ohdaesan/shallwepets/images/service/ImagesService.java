@@ -29,7 +29,7 @@ public class ImagesService {
     private final ModelMapper modelMapper;
 
     public Images save(ImagesDTO imagesDTO) {
-        Images image = new Images(imagesDTO.getImageUrl(), imagesDTO.getImageOrigName(), imagesDTO.getImageSavedName());
+        Images image = modelMapper.map(imagesDTO, Images.class);
         imagesRepository.save(image);
 
         return image;
@@ -66,5 +66,9 @@ public class ImagesService {
     public void updateImage(ImagesDTO imagesDTO) {
         Images image = modelMapper.map(imagesDTO, Images.class);
         imagesRepository.save(image);
+    }
+
+    public List<Images> getImagesByPostNo(Long postNo) {
+        return imagesRepository.findImagesByPostNo(postNo);
     }
 }
