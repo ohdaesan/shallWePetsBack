@@ -45,6 +45,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     * */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+
+        // 요청 URI 로그 출력
+        System.out.println("Request URI: " + request.getRequestURI());
+
+        // 필터가 호출되었는지 확인
+        System.out.println("JwtAuthorizationFilter가 호출되었습니다.");
+
         /*
          * 권한이 필요없는 리소스 추출
          * */
@@ -76,7 +83,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/v3/api-docs",              // swagger 설정
                 "/v3/api-docs/(.*)",         // swagger 설정
                 "/swagger-resources",        // swagger 설정
-                "/swagger-resources/(.*)"    // swagger 설정
+                "/swagger-resources/(.*)",  // swagger 설정
+                "/chat"
+//                "/chattingRoom/create",
+//                "/chattingRoom/message"
 //                "/ws/(.*)"
 
         );
@@ -108,6 +118,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         // 헤더에서 토큰 꺼내기
         String header = request.getHeader(AuthConstants.AUTH_HEADER);
+        System.out.println("Header: " + header); // 헤더 값 로그 출력
 
 
         // 유효한 토큰인지 확인

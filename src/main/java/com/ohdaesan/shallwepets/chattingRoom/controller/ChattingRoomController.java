@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,13 +55,16 @@ public class ChattingRoomController {
 
     // 새로운 채팅방 생성
     @PostMapping("/create")
-    public ResponseEntity<Long> createChattingRoom(@RequestBody Map<String, Long> members) {
+    public ResponseEntity<Map<String, Long>> createChattingRoom(@RequestBody Map<String, Long> members) {
         Long member1 = members.get("member1_no");
         Long member2 = members.get("member2_no");
         Long chattingRoomNo = chattingRoomService.createChattingRoom(member1, member2);
 
         // 생성된 채팅방 번호를 반환
-        return ResponseEntity.ok(chattingRoomNo);
+//        return ResponseEntity.ok(chattingRoomNo);
+        Map<String, Long> response = new HashMap<>();
+        response.put("chattingRoomNo", chattingRoomNo);
+        return ResponseEntity.ok(response);
     }
 
 
