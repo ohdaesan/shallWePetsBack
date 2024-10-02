@@ -8,6 +8,7 @@ import lombok.*;
 @Setter
 @ToString
 public class ReviewImagesDTO {
+    private Long reviewImageNo;
     private Long reviewNo;
     private Long imageNo;
 }
