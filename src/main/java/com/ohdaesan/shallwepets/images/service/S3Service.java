@@ -91,8 +91,8 @@ public class S3Service {
         }
     }
 
-    public Map<String, String> updateFile(Long imageNo, MultipartFile multipartFile) throws IOException {
-        Map<String, String> map = new HashMap<>();
+    public Map<String, Object> updateFile(Long imageNo, MultipartFile multipartFile) throws IOException {
+        Map<String, Object> map = new HashMap<>();
 
         try{
             Images image = imagesService.findImagesByImageNo(imageNo);
@@ -111,6 +111,7 @@ public class S3Service {
             map.put("imageUrl", amazonS3.getUrl(bucket, uniqueFileName).toString());
             map.put("imageOrigName", originalFileName);
             map.put("imageSavedName", uniqueFileName);
+            map.put("imageCreatedDate", image.getCreatedDate());
             map.put("imageNo", imageNo.toString());
         } catch (NoSuchElementException e) {
             map.put("error", "해당 번호의 이미지를 찾을 수 없습니다.");
