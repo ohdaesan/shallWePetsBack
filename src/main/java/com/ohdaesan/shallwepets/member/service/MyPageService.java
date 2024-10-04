@@ -226,7 +226,7 @@ public class MyPageService {
 
     @Transactional
     public PostDTO registerBusiness(Long memberNo, PostDTO postDTO, List<MultipartFile> images) throws IOException {
-        Member member = memberRepository.PostfindByMemberNo(memberNo)
+        Member member = memberRepository.findPostByMemberNo(memberNo)
                 .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
 
         if (images.size() > 10) {
@@ -238,7 +238,7 @@ public class MyPageService {
 
 
         List<Images> postImages = uploadImages(images);
-        post.setImages(postImages);
+//        post.setImages(postImages);
 
         Post savedPost = postRepository.save(post);
 
@@ -249,7 +249,7 @@ public class MyPageService {
     }
 
     public List<PostDTO> getMyBusinessList(Long memberNo) {
-        Member member = memberRepository.findByMemberNo(memberNo)
+        Member member = memberRepository.findPostByMemberNo(memberNo)
                 .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
 
         List<Post> posts = postRepository.findByMember(member);

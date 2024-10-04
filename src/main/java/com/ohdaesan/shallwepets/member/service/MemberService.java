@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -115,5 +116,9 @@ public class MemberService {
 
     public Long findImageNoById (Long memberNo) {
         return memberRepository.findImageNoByMemberNo(memberNo);
+    }
+
+    public List<Member> getAllMembers() {
+        return memberRepository.findAll(); // Member 엔티티 리스트를 그대로 반환
     }
 }
