@@ -50,24 +50,57 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String token = extractToken(Objects.requireNonNull(session.getUri()));
         //                          (session.getUri()); 에서 수정
         System.out.println("추출된 토큰:" + token); // 토큰이 잘 추출되는지 확인하기 위한 로그
+
+
+
         if (token == null || !TokenUtils.isValidToken(token)) {
             session.close(CloseStatus.POLICY_VIOLATION.withReason("토큰이 없습니다"));
             return;
         }
 
+
+
         // 토큰에서 memberNo 추출하기
-        Claims claims = TokenUtils.getClaimsFromToken(token);
-        Long memberNo = claims.get("memberNo", Long.class);
-        if (memberNo == null) {
-            session.close(CloseStatus.POLICY_VIOLATION.withReason("Member ID not found in token"));
+//        Claims claims = TokenUtils.getClaimsFromToken(token);
+//        Long memberNo = claims.get("memberNo", Long.class);
+//        if (memberNo == null) {
+//            session.close(CloseStatus.POLICY_VIOLATION.withReason("Member ID not found in token"));
+//            return;
+//        }
+        Long memberNo = null;
+        try {
+            Claims claims = TokenUtils.getClaimsFromToken(token);
+            memberNo = claims.get("memberNo", Long.class);
+            System.out.println("추출된 memberNo: " + memberNo);
+
+            if (memberNo == null) {
+                System.out.println("memberNo를 찾을 수 없음");
+                session.close(CloseStatus.POLICY_VIOLATION.withReason("Member ID not found in token"));
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("토큰 처리 중 예외 발생: " + e.getMessage());
+            session.close(CloseStatus.POLICY_VIOLATION.withReason("Token processing error"));
             return;
         }
+
+
 //
         // memberNo 저장하기
+        System.out.println("세션 속성 설정 전: " + session.getAttributes());
         session.getAttributes().put("memberNo", memberNo);
+        System.out.println("세션 속성 설정 후: " + session.getAttributes());
 
+        System.out.println("세션 저장 전: 세션 ID = " + session.getId());
         sessions.put(session.getId(), session);
+        System.out.println("세션 저장 후: " + sessions);
         System.out.println("새로운 WebSocket 연결: " + session.getId() + ", Member No: " + memberNo);
+
+        if (session.isOpen()) {
+            System.out.println("세션이 열려있음: " + session.getId());
+        } else {
+            System.out.println("세션이 닫혀 있음: " + session.getId());
+        }
 
     }
 

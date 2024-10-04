@@ -136,10 +136,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
                     // 토큰에 담긴 정보로 Member 객체를 만든다.
                     // (SecurityContext에 등록될 인증 객체(UserDetail)을 만들기 위해)
+                    Long memberNo = claims.get("memberNo", Long.class); // 채팅방 생성할 때 멤버 넘버 가져오기 위해 추가
                     Member member = Member.builder()
                             .memberId(claims.get("memberName").toString())
                             .memberEmail(claims.get("memberEmail").toString())
                             .memberRole(RoleType.valueOf(claims.get("memberRole").toString()))
+                            // 채팅을 실행할 때 멤버 넘버를 가져오기 위한 메서드 추가
+                            .memberNo(memberNo)
                             .build();
 
                     // 토큰에 담겨있던 정보로 인증 객체를 만든다.
@@ -193,7 +196,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         else if (e instanceof JwtException) {
             resultMsg = "TOKEN Parsing JwtException";
         }
-        // 이외 JTW 토큰내에서 오류 발생
+        // 이외 JWT 토큰내에서 오류 발생
         else {
             System.out.println(e.getMessage());
             resultMsg = "OTHER TOKEN ERROR";

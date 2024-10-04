@@ -165,6 +165,7 @@ public class TokenUtils {
         claims.put("memberName", member.getMemberName());
         claims.put("memberRole", member.getMemberRole());
         claims.put("memberEmail", member.getMemberEmail());
+        claims.put("memberNo", member.getMemberNo());
 
         return claims;
     }
