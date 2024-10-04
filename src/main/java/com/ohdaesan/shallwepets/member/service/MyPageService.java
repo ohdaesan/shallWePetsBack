@@ -1,10 +1,14 @@
-package com.ohdaesan.shallwepets.mypage.service;
+package com.ohdaesan.shallwepets.member.service;
 
 import com.ohdaesan.shallwepets.images.domain.entity.Images;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
 import com.ohdaesan.shallwepets.mypage.domain.dto.ChangePasswordDTO;
+import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
+import com.ohdaesan.shallwepets.post.domain.entity.Post;
+import com.ohdaesan.shallwepets.post.domain.entity.PostImages;
+import com.ohdaesan.shallwepets.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -13,9 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +32,7 @@ public class MyPageService {
 
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg", "gif");
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    private final PostRepository postRepository;
 
     public MemberDTO getMemberInfo(Long memberNo) {
         Member member = memberRepository.findByMemberNo(memberNo);
@@ -214,4 +221,103 @@ public class MyPageService {
 
         memberRepository.save(updatedMember);
     }
+
+    // 여기서부터 post
+
+    @Transactional
+    public PostDTO registerBusiness(Long memberNo, PostDTO postDTO, List<MultipartFile> images) throws IOException {
+        Member member = memberRepository.PostfindByMemberNo(memberNo)
+                .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
+
+        if (images.size() > 10) {
+            throw new IllegalArgumentException("최대 10장의 이미지만 업로드할 수 있습니다.");
+        }
+
+        Post post = modelMapper.map(postDTO, Post.class);
+        post.setMember(member);
+
+
+        List<Images> postImages = uploadImages(images);
+        post.setImages(postImages);
+
+        Post savedPost = postRepository.save(post);
+
+        member.setHasBusinessRegistered(true);
+        memberRepository.save(member);
+
+        return modelMapper.map(savedPost, PostDTO.class);
+    }
+
+    public List<PostDTO> getMyBusinessList(Long memberNo) {
+        Member member = memberRepository.findByMemberNo(memberNo)
+                .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
+
+        List<Post> posts = postRepository.findByMember(member);
+        return posts.stream()
+                .map(post -> modelMapper.map(post, PostDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public PostDTO getBusinessDetail(Long postNo, Long memberNo) {
+        Post post = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
+        return modelMapper.map(post, PostDTO.class);
+    }
+
+    @Transactional
+    public PostDTO updateBusiness(Long postNo, Long memberNo, PostDTO updatedPostDTO, List<MultipartFile> newImages) throws IOException {
+        Post existingPost = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
+
+        // DTO를 기존 게시물에 매핑
+        modelMapper.map(updatedPostDTO, existingPost);
+
+        if (newImages != null && !newImages.isEmpty()) {
+            if (newImages.size() > 10) {
+                throw new IllegalArgumentException("최대 10장의 이미지만 업로드할 수 있습니다.");
+            }
+
+            // 기존 이미지 삭제
+            deleteExistingImages(existingPost.getPostImages());
+
+            // 새 이미지 업로드
+            List<Images> uploadedImages = uploadImages(newImages);
+            List<PostImages> postImagesList = new ArrayList<>();
+
+            for (Images image : uploadedImages) {
+                PostImages postImage = new PostImages();
+                postImage.setPost(existingPost); // 현재 게시물 설정
+                postImage.setImage(image); // 업로드된 이미지 설정
+                postImagesList.add(postImage);
+            }
+
+            existingPost.setPostImages(postImagesList); // 기존 게시물에 새 이미지 리스트 설정
+        }
+
+        Post savedPost = postRepository.save(existingPost); // 업데이트된 게시물 저장
+        return modelMapper.map(savedPost, PostDTO.class); // 저장된 게시물 DTO 반환
+    }
+
+    private List<Images> uploadImages(List<MultipartFile> images) throws IOException {
+        // 이미지 업로드 로직 구현
+        // 실제 구현은 사용하는 스토리지 서비스에 따라 다를 수 있습니다.
+        return null;
+    }
+
+    private void deleteExistingImages(List<PostImages> images) {
+        // 기존 이미지 삭제 로직 구현
+        // 실제 구현은 사용하는 스토리지 서비스에 따라 다를 수 있습니다.
+    }
+
+    @Transactional
+    public void deleteBusiness(Long postNo, Long memberNo) {
+        // 게시물과 회원 번호로 게시물을 조회
+        Post post = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
+
+        // 게시물 삭제
+        postRepository.delete(post);
+    }
+
+
 }

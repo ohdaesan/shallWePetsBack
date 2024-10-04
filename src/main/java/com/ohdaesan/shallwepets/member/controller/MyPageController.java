@@ -1,9 +1,10 @@
-package com.ohdaesan.shallwepets.mypage.controller;
+package com.ohdaesan.shallwepets.member.controller;
 
 import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.mypage.domain.dto.ChangePasswordDTO;
-import com.ohdaesan.shallwepets.mypage.service.MyPageService;
+import com.ohdaesan.shallwepets.member.service.MyPageService;
+import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "MyPage")
@@ -87,4 +89,45 @@ public class MyPageController {
         myPageService.changePassword(memberNo, changePasswordDTO);
         return ResponseEntity.ok(new ResponseDTO(200, "비밀번호가 성공적으로 변경되었습니다.", null));
     }
+
+
+    // 여기서부터 post
+
+    @PostMapping("/businessregister")
+    public ResponseEntity<PostDTO> registerBusiness(
+            @RequestPart("postDTO") PostDTO postDTO,
+            @RequestPart("images") List<MultipartFile> images,
+            @RequestParam("memberNo") Long memberNo) throws IOException {
+        PostDTO registeredPost = myPageService.registerBusiness(memberNo, postDTO, images);
+        return ResponseEntity.ok(registeredPost);
+    }
+
+    @GetMapping("/mybusinesslist")
+    public ResponseEntity<List<PostDTO>> getMyBusinessList(@RequestParam("memberNo") Long memberNo) {
+        List<PostDTO> postList = myPageService.getMyBusinessList(memberNo);
+        return ResponseEntity.ok(postList);
+    }
+
+    @GetMapping("/mybusinesslist/{postNo}")
+    public ResponseEntity<PostDTO> getBusinessDetail(@PathVariable Long postNo, @RequestParam("memberNo") Long memberNo) {
+        PostDTO post = myPageService.getBusinessDetail(postNo, memberNo);
+        return ResponseEntity.ok(post);
+    }
+
+    @PutMapping("/mybusinesslist/{postNo}")
+    public ResponseEntity<PostDTO> updateBusiness(
+            @PathVariable Long postNo,
+            @RequestParam("memberNo") Long memberNo,
+            @RequestPart("postDTO") PostDTO postDTO,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
+        PostDTO updatedPost = myPageService.updateBusiness(postNo, memberNo, postDTO, images);
+        return ResponseEntity.ok(updatedPost);
+    }
+
+    @DeleteMapping("/mybusinesslist/{postNo}")
+    public ResponseEntity<Void> deleteBusiness(@PathVariable Long postNo, @RequestParam("memberNo") Long memberNo) {
+        myPageService.deleteBusiness(postNo, memberNo);
+        return ResponseEntity.noContent().build();  // 삭제 성공 시 204 No Content 응답
+    }
+
 }
