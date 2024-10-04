@@ -22,7 +22,7 @@ public class BookmarkController {
     private final BookmarkService bookmarkService;
 
     // 북마크 추가
-//    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @PostMapping("/bookmark")
     public ResponseEntity<ResponseDTO> createBookmark(@RequestBody BookmarkDTO bookmarkDTO) {
         try {
@@ -38,7 +38,7 @@ public class BookmarkController {
     }
 
     // 멤버 넘버로 모든 북마크 찾기
-//    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/{memberNo}")
     public ResponseEntity<ResponseDTO> getBookmarksByMember(@PathVariable Long memberNo) {
         try {
@@ -52,7 +52,7 @@ public class BookmarkController {
     }
 
     // Delete a bookmark
-//    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/delete")
     public ResponseEntity<ResponseDTO> deleteBookmark(@RequestParam Long postNo, @RequestParam Long memberNo) {
         Optional<BookmarkDTO> deleteBookmark = bookmarkService.deleteBookmark(postNo, memberNo);

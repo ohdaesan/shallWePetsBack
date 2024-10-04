@@ -4,7 +4,7 @@ import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor
-//@AllArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -13,6 +13,7 @@ public class ImagesDTO {
     private String imageUrl;
     private String imageOrigName;
     private String imageSavedName;
+    private String imageSavedPath;
 
     private MultipartFile file;
 }

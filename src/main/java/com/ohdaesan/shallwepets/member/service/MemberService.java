@@ -1,6 +1,7 @@
 package com.ohdaesan.shallwepets.member.service;
 
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
+import com.ohdaesan.shallwepets.member.domain.entity.Grade;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -22,12 +23,6 @@ public class MemberService {
 
     @Transactional
     public MemberDTO register(MemberDTO memberDTO) {
-        // 중복체크 (optional)
-        // email을 사용자 특정하는데 사용 => 이메일은 중복 X
-
-        // 이메일 중복 체크
-        // DB에서 email로 Member를 조회했을 때 존재하면 Exception 처리
-
         // 비밀번호 암호화
         memberDTO.setMemberPwd(passwordEncoder.encode(memberDTO.getMemberPwd()));
         memberDTO.setMemberRole(/*RoleType.USER*/ "USER");
@@ -118,5 +113,7 @@ public class MemberService {
                 .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
     }
 
-
+    public Long findImageNoById (Long memberNo) {
+        return memberRepository.findImageNoByMemberNo(memberNo);
+    }
 }

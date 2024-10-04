@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
     @Bean
     public GroupedOpenApi chatOpenApi() {
-        String[] paths = {"/api/v1/**", "/member/**", "/review/**"};    // Swagger에서 처리 되었으면 하는 경로 설정
+        String[] paths = {"/api/v1/**", "/member/**", "/review/**", "/post/**", "/images/**", "/select_location/**", "/points/**", "/bookmark/**"};    // Swagger에서 처리 되었으면 하는 경로 설정
         return GroupedOpenApi.builder()
                 .group("api-v1")
                 .pathsToMatch(paths)
