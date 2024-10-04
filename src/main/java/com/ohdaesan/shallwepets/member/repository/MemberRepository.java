@@ -40,5 +40,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT m.image.imageNo FROM Member m WHERE m.memberNo = :memberNo")
     Long findImageNoByMemberNo(@Param("memberNo") Long memberNo);
 
-    Optional<Member> PostfindByMemberNo(Long memberNo);
+    Optional<Member> findPostByMemberNo(Long memberNo);
+
 }
+

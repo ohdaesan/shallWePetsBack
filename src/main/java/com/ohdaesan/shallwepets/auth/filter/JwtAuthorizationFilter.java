@@ -59,6 +59,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/member/checkId",
                 "/member/checkNickname",
                 "/member/checkUser",
+//                "/member/memberList",
                 "/sendMail",
                 "/checkMail",
                 "/sendSms",
@@ -74,8 +75,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/review/(.*)/(.*)",
 //                "/bookmark/(.*)",
 //                "/bookmark/(.*)/(.*)",
-                "/bookmark/delete",
-                "/points/(.*)",
+//                "/points/(.*)",
                 "/select_location",
                 "/swagger-ui/(.*)",          // swagger 설정
                 "/swagger-ui/index.html",    // swagger 설정
