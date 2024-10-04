@@ -70,7 +70,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/images/getImageByMemberNo/(.*)",
                 "/images/getImagesByPostNo",
                 "/import-csv",
-                "/post/(.*)",
+//                "/post/(.*)",
                 "/review/(.*)",
                 "/review/(.*)/(.*)",
 //                "/bookmark/(.*)",

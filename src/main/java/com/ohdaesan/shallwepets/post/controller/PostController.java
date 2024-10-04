@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -42,7 +43,7 @@ public class PostController {
 
 
     // user의 업체 등록 신청
-//    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "업체 등록", description = "user의 업체 등록")
     @PostMapping("/registerPost")
     public ResponseEntity<ResponseDTO> registerPost(@RequestBody PostDTO postDTO) {
@@ -56,8 +57,7 @@ public class PostController {
     }
 
     // 전체 폼 List 조회 (front에서 memberNo,awaiting)
-    // 리뷰 전체 조회
-//    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('USER') or hasAnyAuthority('ADMIN')")
     @Operation(summary = "post 전체 조회", description = "post 전체 조회")
     @GetMapping("/getAllPost")
     public ResponseEntity<ResponseDTO> getAllPost() {
@@ -70,7 +70,7 @@ public class PostController {
     }
 
     // 관리자의 폼 수정[반려 or 승인](상태 변경+ 반려사유)
-//    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "업체 상태 수정", description = "업체 상태 수정")
     @PutMapping("/{postNo}")
     public ResponseEntity<ResponseDTO> updatePostStatus(@PathVariable Long postNo, @RequestBody PostDTO postDTO) {
