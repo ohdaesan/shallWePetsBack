@@ -206,4 +206,5 @@ public class MemberController {
 
         return ResponseEntity.ok().body(new ResponseDTO(200, "email과 전화번호 이용한 멤버 존재 여부 확인 성공", response));
     }
+
 }
