@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface PostImagesRepository extends JpaRepository<PostImages, Long> {
     List<PostImages> findByImage_ImageNo(Long imageNo);
+
+    void deleteByPost(Post post);
 }
