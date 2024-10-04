@@ -1,11 +1,14 @@
 package com.ohdaesan.shallwepets.chattingRoom.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdaesan.shallwepets.auth.util.TokenUtils;
 import com.ohdaesan.shallwepets.chattingRoom.service.ChattingRoomService;
 import com.ohdaesan.shallwepets.message.domain.dto.MessageDTO;
 import io.jsonwebtoken.Claims;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -24,8 +27,11 @@ import static com.ohdaesan.shallwepets.auth.util.TokenUtils.isValidToken;
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(ChatWebSocketHandler.class);
+
     // 현재 연결된 모든 세션을 저장할 맵
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+//    private final Map<Long, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -33,6 +39,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     public ChatWebSocketHandler(ChattingRoomService chattingRoomService) {
         this.chattingRoomService = chattingRoomService;
+
     }
 
     // 클라이언트가 연결될 때 호출
@@ -104,33 +111,86 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     }
 
+//    @Override
+//    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+//        String payload = message.getPayload();
+//
+//        // 메시지 DTO 파싱
+//        if (payload.startsWith("{") && payload.endsWith("}")) {
+//            Map<String, Long> memberIds = objectMapper.readValue(payload, new TypeReference<Map<String, Long>>() {
+//            });
+//            Long member1No = memberIds.get("member1_no");
+//            Long member2No = memberIds.get("member2_no");
+//
+//            // 채팅방 생성
+//            Long chattingRoomNo = chattingRoomService.createChattingRoom(member1No, member2No);
+//            session.sendMessage(new TextMessage("새로운 채팅방 생성됨: " + chattingRoomNo));
+//        } else {
+//            // 기존 메시지 처리 로직
+//            MessageDTO messageDTO = objectMapper.readValue(payload, MessageDTO.class);
+//            chattingRoomService.saveMessage(messageDTO.getMemberNo(), messageDTO.getChattingRoomNo(), messageDTO.getContent());
+//
+//            // 연결된 모든 사람에게 메시지 보여주기
+//            for (WebSocketSession wsSession : sessions.values()) {
+//                if (wsSession.isOpen()) {
+//                    wsSession.sendMessage(new TextMessage(payload));
+//                }
+//            }
+//        }
+//
+//    }
+
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
 
-        // 메시지 DTO 파싱
-        if (payload.startsWith("{") && payload.endsWith("}")) {
-            Map<String, Long> memberIds = objectMapper.readValue(payload, new TypeReference<Map<String, Long>>() {
-            });
-            Long member1No = memberIds.get("member1_no");
-            Long member2No = memberIds.get("member2_no");
+        try {
+            // JSON 포맷 유효성 검사
+            if (payload.startsWith("{") && payload.endsWith("}")) {
+                Map<String, Object> messageData = objectMapper.readValue(payload, new TypeReference<Map<String, Object>>() {});
 
-            // 채팅방 생성
-            Long chattingRoomNo = chattingRoomService.createChattingRoom(member1No, member2No);
-            session.sendMessage(new TextMessage("새로운 채팅방 생성됨: " + chattingRoomNo));
-        } else {
-            // 기존 메시지 처리 로직
-            MessageDTO messageDTO = objectMapper.readValue(payload, MessageDTO.class);
-            chattingRoomService.saveMessage(messageDTO.getMemberNo(), messageDTO.getChattingRoomNo(), messageDTO.getContent());
+                // timestamp를 Long으로 변환
+                messageData.put("timestamp", System.currentTimeMillis());
 
-            // 연결된 모든 사람에게 메시지 보여주기
-            for (WebSocketSession wsSession : sessions.values()) {
-                if (wsSession.isOpen()) {
-                    wsSession.sendMessage(new TextMessage(payload));
+                // 추가 처리 로직 (예: 메시지 저장, 채팅방 생성 등)
+//                Long member1No = ((Number) messageData.get("member1_no")).longValue();
+//                Long member2No = ((Number) messageData.get("member2_no")).longValue();
+                // member1_no 및 member2_no 유효성 검사
+                Long member1No = messageData.containsKey("member1_no") ? ((Number) messageData.get("member1_no")).longValue() : null;
+                Long member2No = messageData.containsKey("member2_no") ? ((Number) messageData.get("member2_no")).longValue() : null;
+
+
+                // 회원 ID가 유효한지 확인
+                if (member1No == null || member2No == null) {
+                    sendErrorMessage(session, "유효하지 않은 회원 ID입니다.");
+                    return;
+                }
+
+                // 채팅방 생성
+//                Long chattingRoomNo = chattingRoomService.createChattingRoom(member1No, member2No);
+                Long chattingRoomNo = chattingRoomService.createOrFindChatRoom(member1No, member2No);
+                session.sendMessage(new TextMessage("새로운 채팅방 생성됨: " + chattingRoomNo));
+            } else {
+                // 기존 메시지 처리 로직
+                MessageDTO messageDTO = objectMapper.readValue(payload, MessageDTO.class);
+                chattingRoomService.saveMessage(messageDTO.getMemberNo(), messageDTO.getChattingRoomNo(), messageDTO.getContent());
+
+                // 연결된 모든 사람에게 메시지 보여주기
+                for (WebSocketSession wsSession : sessions.values()) {
+                    if (wsSession.isOpen()) {
+                        wsSession.sendMessage(new TextMessage(payload));
+                    }
                 }
             }
+        } catch (JsonProcessingException e) {
+            // JSON 파싱 오류 처리
+            session.sendMessage(new TextMessage("유효하지 않은 메시지 형식입니다."));
+            logger.error("JSON 파싱 오류: " + e.getMessage(), e);
+        } catch (Exception e) {
+            // 일반적인 오류 처리
+            session.sendMessage(new TextMessage("메시지 처리 중 오류가 발생했습니다."));
+            logger.error("메시지 처리 중 오류 발생: " + e.getMessage(), e);
         }
-
     }
 
     // 연결이 종료될 때 호출
@@ -170,5 +230,21 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             }
         }
         return null; // 토큰이 없을 경우 null 반환
+    }
+
+    // 오류 메시지를 JSON 형식으로 전송
+    private void sendErrorMessage(WebSocketSession session, String errorMessage) throws IOException {
+        String jsonErrorMessage = createJsonMessage(errorMessage);
+        session.sendMessage(new TextMessage(jsonErrorMessage));
+    }
+
+    // 메시지를 JSON 형식으로 감싸기
+    private String createJsonMessage(String content) {
+        try {
+            return objectMapper.writeValueAsString(Map.of("error", content));
+        } catch (JsonProcessingException e) {
+            logger.error("JSON 변환 오류: " + e.getMessage(), e);
+            return "{\"error\": \"메시지 생성 중 오류 발생\"}";
+        }
     }
 }

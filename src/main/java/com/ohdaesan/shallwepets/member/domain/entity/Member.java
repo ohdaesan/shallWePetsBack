@@ -45,4 +45,8 @@ public class Member {
     @OneToOne
     @JoinColumn(name = "image_no")
     private Images image;
+
+    public Long getId() {
+        return this.memberNo;
+    }
 }
