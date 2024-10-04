@@ -11,16 +11,17 @@ import java.util.Optional;
 
 @Repository
 public interface ImagesRepository extends JpaRepository<Images, Long> {
-    Optional<Images> findImagesByImageNo(Long ImageNo);
 
-    @Query("SELECT i FROM Images i " +
-            "JOIN PostImages pi ON i.imageNo = pi.image.imageNo " +
-            "WHERE pi.post.postNo = :postNo " +
+    Optional<Images> findImagesByImageNo(Long imageNo);
+
+    @Query(value = "SELECT i.* FROM Images i " +
+            "JOIN PostImages pi ON i.image_no = pi.image_no " +
+            "WHERE pi.post_no = :postNo " +
             "UNION " +
-            "SELECT i FROM Images i " +
-            "JOIN ReviewImages ri ON i.imageNo = ri.image.imageNo " +
-            "JOIN Review r ON ri.review.reviewNo = r.reviewNo " +
-            "WHERE r.post.postNo = :postNo " +
-            "ORDER BY i.createdDate DESC")
+            "SELECT i.* FROM Images i " +
+            "JOIN ReviewImages ri ON i.image_no = ri.image_no " +
+            "JOIN Review r ON ri.review_no = r.review_no " +
+            "WHERE r.post_no = :postNo " +
+            "ORDER BY i.created_date DESC", nativeQuery = true)
     List<Images> findImagesByPostNo(@Param("postNo") Long postNo);
 }

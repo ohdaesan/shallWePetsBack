@@ -27,6 +27,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Member findByMemberId(String memberId);
 
+    Member findByMemberNo(Long memberNo);
+
     @Modifying
     @Transactional
     @Query("UPDATE Member m SET m.memberPwd = :modifiedPw WHERE m.memberId = :memberId")
@@ -37,4 +39,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 //    Long findImageNoByMemberNo(Long memberNo);
     @Query("SELECT m.image.imageNo FROM Member m WHERE m.memberNo = :memberNo")
     Long findImageNoByMemberNo(@Param("memberNo") Long memberNo);
+
+    Optional<Member> PostfindByMemberNo(Long memberNo);
 }

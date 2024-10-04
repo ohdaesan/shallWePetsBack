@@ -264,27 +264,7 @@ public class PostService {
     }
 
 
-    public List<Post> getPostsByCategoryAndCities(String category, List<String> cities) {
-        Set<Post> postsSet = new HashSet<>();
 
-        for (String city : cities) {
-            List<Post> posts = postRepository.findByCtgryTwoNmAndCtyprvnNmContains(category, city);
-            postsSet.addAll(posts);
-        }
-
-        return new ArrayList<>(postsSet);
-    }
-
-    public List<String> getDistinctSignguByCitiesAndCategory(List<String> cities, String category) {
-        Set<String> signguSet = new HashSet<>();
-
-        for (String city : cities) {
-            List<String> signgus = postRepository.findDistinctSignguByCtyprvnNmContainsAndCtgryTwoNm(city, category);
-            signguSet.addAll(signgus);
-        }
-
-        return new ArrayList<>(signguSet);
-    }
 
 
 }
