@@ -48,8 +48,10 @@ public class Post {
     private String parkngPosblAt;
     private String utilizaPrcCn;
     private String rdnmadrNm;
+    private String petInfoCn;
     private String lnmAddr;
     private String zipNo;
+    private String detailAddress;
     private String petPosblAt;
     private String entrnPosblPetSizeValue;
     private String petLmttMtrCn;
@@ -71,6 +73,10 @@ public class Post {
     public void removePostImage(PostImages postImage) {
         this.postImages.remove(postImage);
         postImage.setPost(null);
+    }
+
+    public void setPostImage(List<PostImages> postImages) {
+        this.postImages = postImages; // postImages 필드에 값 설정
     }
 }
 

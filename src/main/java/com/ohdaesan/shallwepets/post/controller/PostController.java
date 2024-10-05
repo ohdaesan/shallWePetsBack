@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -42,9 +43,9 @@ public class PostController {
 
 
     // user의 업체 등록 신청
-//    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "업체 등록", description = "user의 업체 등록")
-    @PostMapping("/registerPost")
+    @PostMapping("/businessregister")
     public ResponseEntity<ResponseDTO> registerPost(@RequestBody PostDTO postDTO) {
         PostDTO post = postService.registerPost(postDTO);
         Map<String, Object> responseMap = new HashMap<>();
@@ -71,29 +72,29 @@ public class PostController {
 
     // 관리자의 폼 수정[반려 or 승인](상태 변경+ 반려사유)
 //    @PreAuthorize("hasAuthority('ADMIN')")
-    @Operation(summary = "업체 상태 수정", description = "업체 상태 수정")
-    @PutMapping("/{postNo}")
-    public ResponseEntity<ResponseDTO> updatePostStatus(@PathVariable Long postNo, @RequestBody PostDTO postDTO) {
-        PostDTO updatedPost = postService.updatePostStatus(postNo, postDTO);
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("post", updatedPost);
-
-        return ResponseEntity.ok()
-                .body(new ResponseDTO(200, "게시물 수정 성공", responseMap));
-    }
+//    @Operation(summary = "업체 상태 수정", description = "업체 상태 수정")
+//    @PutMapping("/{postNo}")
+//    public ResponseEntity<ResponseDTO> updatePostStatus(@PathVariable Long postNo, @RequestBody PostDTO postDTO) {
+//        PostDTO updatedPost = postService.updatePostStatus(postNo, postDTO);
+//        Map<String, Object> responseMap = new HashMap<>();
+//        responseMap.put("post", updatedPost);
+//
+//        return ResponseEntity.ok()
+//                .body(new ResponseDTO(200, "게시물 수정 성공", responseMap));
+//    }
 
 
     // 신청자의 반려당한 이후 폼 수정
-    @Operation(summary = "반려된 폼 수정", description = "반려된 폼 수정")
-    @PutMapping("/rePost/{postNo}")
-    public ResponseEntity<ResponseDTO> updatePostForm(@PathVariable Long postNo, @RequestBody PostDTO postDTO) {
-        PostDTO updatedPost = postService.updatePostForm(postNo, postDTO);
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("post", updatedPost);
-
-        return ResponseEntity.ok()
-                .body(new ResponseDTO(200, "폼 수정 성공", responseMap));
-    }
+//    @Operation(summary = "반려된 폼 수정", description = "반려된 폼 수정")
+//    @PutMapping("/rePost/{postNo}")
+//    public ResponseEntity<ResponseDTO> updatePostForm(@PathVariable Long postNo, @RequestBody PostDTO postDTO) {
+//        PostDTO updatedPost = postService.updatePostForm(postNo, postDTO);
+//        Map<String, Object> responseMap = new HashMap<>();
+//        responseMap.put("post", updatedPost);
+//
+//        return ResponseEntity.ok()
+//                .body(new ResponseDTO(200, "폼 수정 성공", responseMap));
+//    }
 
 
 

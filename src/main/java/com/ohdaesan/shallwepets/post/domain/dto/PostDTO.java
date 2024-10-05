@@ -25,10 +25,12 @@ public class PostDTO {
     private String lcLo;
     private String zipNo;
     private String rdnmadrNm;
+    private String petInfoCn;
     private String lnmAddr;
     private String telNo;
     private String hmpgUrl;
     private String rstdeGuidCn;
+    private String detailAddress;
     private String operTime;
     private String parkngPosblAt;
     private String utilizaPrcCn;
