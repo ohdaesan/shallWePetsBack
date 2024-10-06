@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @ToString
 public class MemberDTO {
     private Long memberNo;
@@ -27,4 +28,5 @@ public class MemberDTO {
     private String memberRole = "USER";
     private String grade = "치와와";
     private Long imageNo;
+    private boolean hasBusinessRegistered; // 추가
 }

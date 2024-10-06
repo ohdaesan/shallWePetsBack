@@ -2,10 +2,7 @@ package com.ohdaesan.shallwepets.member.domain.entity;
 
 import com.ohdaesan.shallwepets.images.domain.entity.Images;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
 public class Member {
     @Id
@@ -46,7 +44,7 @@ public class Member {
     @JoinColumn(name = "image_no")
     private Images image;
 
-    public void setImage(Images image) {
-        this.image = image;
-    }
+    private boolean hasBusinessRegistered;
+
 }
+
