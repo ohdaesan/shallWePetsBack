@@ -180,6 +180,7 @@ public class ImagesController {
             if (limit > 0) {    // limit 길이만큼의 이미지 리스트 반환
                 List<Images> sizeLimitImages = images.size() > limit ? images.subList(0, limit) : images;
                 response.put("imageList", sizeLimitImages);
+                response.put("totalSize", images.size());
             } else {            // -1이면 전체 리스트 반환
                 response.put("imageList", images);
             }

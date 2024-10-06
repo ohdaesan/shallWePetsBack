@@ -187,6 +187,74 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             String keyword,
             Pageable pageable);
 
+    // ctyprvnNm이 하나일 때 + 시군구 필터링 + 검색어 필터링
+    @Query("SELECT p FROM Post p WHERE p.ctgryTwoNm = :ctgryTwoNm AND " +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm, '%') AND " +
+            "p.status = 'APPROVED' AND " +
+            "p.signguNm = :signguNm AND " +
+            "p.fcltyNm LIKE CONCAT('%', :keyword, '%') " +
+            "ORDER BY p.fcltyNm")
+    Page<Post> findByCtgryTwoNmAndCtyprvnNmContainsAndSignguNmEqualsAndFcltyNmContainsOrderByFcltyNm(
+            String ctgryTwoNm,
+            String ctyprvnNm,
+            String signguNm,
+            String keyword,
+            Pageable pageable);
+
+    // ctyprvnNm이 두 개일 때 + 시군구 필터링 + 검색어 필터링
+    @Query("SELECT p FROM Post p WHERE p.ctgryTwoNm = :ctgryTwoNm AND (" +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm1, '%') OR " +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm2, '%')) AND " +
+            "p.status = 'APPROVED' AND " +
+            "p.signguNm = :signguNm AND " +
+            "p.fcltyNm LIKE CONCAT('%', :keyword, '%') " +
+            "ORDER BY p.fcltyNm")
+    Page<Post> findByCtgryTwoNmAndCtyprvnNm1Or2ContainsAndSignguNmEqualsAndFcltyNmContainsOrderByFcltyNm(
+            String ctgryTwoNm,
+            String ctyprvnNm1,
+            String ctyprvnNm2,
+            String signguNm,
+            String keyword,
+            Pageable pageable);
+
+    // ctyprvnNm이 세 개일 때 + 시군구 필터링 + 검색어 필터링
+    @Query("SELECT p FROM Post p WHERE p.ctgryTwoNm = :ctgryTwoNm AND (" +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm1, '%') OR " +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm2, '%') OR " +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm3, '%')) AND " +
+            "p.status = 'APPROVED' AND " +
+            "p.signguNm = :signguNm AND " +
+            "p.fcltyNm LIKE CONCAT('%', :keyword, '%') " +
+            "ORDER BY p.fcltyNm")
+    Page<Post> findByCtgryTwoNmAndCtyprvnNm1Or2Or3ContainsAndSignguNmEqualsAndFcltyNmContainsOrderByFcltyNm(
+            String ctgryTwoNm,
+            String ctyprvnNm1,
+            String ctyprvnNm2,
+            String ctyprvnNm3,
+            String signguNm,
+            String keyword,
+            Pageable pageable);
+
+    // ctyprvnNm이 네 개일 때 + 시군구 필터링 + 검색어 필터링
+    @Query("SELECT p FROM Post p WHERE p.ctgryTwoNm = :ctgryTwoNm AND (" +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm1, '%') OR " +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm2, '%') OR " +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm3, '%') OR " +
+            "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm4, '%')) AND " +
+            "p.status = 'APPROVED' AND " +
+            "p.signguNm = :signguNm AND " +
+            "p.fcltyNm LIKE CONCAT('%', :keyword, '%') " +
+            "ORDER BY p.fcltyNm")
+    Page<Post> findByCtgryTwoNmAndCtyprvnNm1Or2Or3Or4ContainsAndSignguNmEqualsAndFcltyNmContainsOrderByFcltyNm(
+            String ctgryTwoNm,
+            String ctyprvnNm1,
+            String ctyprvnNm2,
+            String ctyprvnNm3,
+            String ctyprvnNm4,
+            String signguNm,
+            String keyword,
+            Pageable pageable);
+
     @Query("SELECT DISTINCT p.signguNm FROM Post p WHERE p.ctyprvnNm LIKE CONCAT('%', :city, '%') AND p.ctgryTwoNm = :category")
     List<String> findDistinctSignguByCtyprvnNmContainsAndCtgryTwoNm(@Param("city") String city, @Param("category") String category);
 }

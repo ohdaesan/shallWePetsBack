@@ -109,9 +109,9 @@ public class PostService {
         } else if (cities.size() == 2) {
             page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2ContainsAndSignguNmEqualsOrderByFcltyNm(category, cities.get(0), cities.get(1), signgu, pageRequest);
         } else if (cities.size() == 3) {
-            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3ContainsAndSignguNmEqualsOrderByFcltyNm(category, cities.get(0), cities.get(1), signgu, cities.get(2), pageRequest);
+            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3ContainsAndSignguNmEqualsOrderByFcltyNm(category, cities.get(0), cities.get(1), cities.get(2), signgu, pageRequest);
         } else if (cities.size() == 4) {
-            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3Or4ContainsAndSignguNmEqualsOrderByFcltyNm(category, cities.get(0), cities.get(1), signgu, cities.get(2), cities.get(3), pageRequest);
+            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3Or4ContainsAndSignguNmEqualsOrderByFcltyNm(category, cities.get(0), cities.get(1), cities.get(2), cities.get(3), signgu, pageRequest);
         }
 
         assert page != null;
@@ -130,9 +130,30 @@ public class PostService {
         } else if (cities.size() == 2) {
             page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2ContainsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), cities.get(1), keyword, pageRequest);
         } else if (cities.size() == 3) {
-            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3ContainsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), cities.get(1), keyword, cities.get(2), pageRequest);
+            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3ContainsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), cities.get(1), cities.get(2), keyword, pageRequest);
         } else if (cities.size() == 4) {
-            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3Or4ContainsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), cities.get(1), keyword, cities.get(2), cities.get(3), pageRequest);
+            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3Or4ContainsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), cities.get(1), cities.get(2), cities.get(3), keyword, pageRequest);
+        }
+
+        assert page != null;
+        List<Post> posts = page.getContent();
+
+        return posts;
+    }
+
+    public List<Post> getPostsByCategoryAndCitiesAndSignguAndKeyword(String category, List<String> cities, String signgu, String keyword, int pageNo) {
+        Page<Post> page = null;
+
+        PageRequest pageRequest = PageRequest.of(pageNo, 10);
+
+        if (cities.size() == 1) {
+            page = postRepository.findByCtgryTwoNmAndCtyprvnNmContainsAndSignguNmEqualsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), signgu, keyword, pageRequest);
+        } else if (cities.size() == 2) {
+            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2ContainsAndSignguNmEqualsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), cities.get(1), signgu, keyword, pageRequest);
+        } else if (cities.size() == 3) {
+            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3ContainsAndSignguNmEqualsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), cities.get(1), cities.get(2), signgu, keyword, pageRequest);
+        } else if (cities.size() == 4) {
+            page = postRepository.findByCtgryTwoNmAndCtyprvnNm1Or2Or3Or4ContainsAndSignguNmEqualsAndFcltyNmContainsOrderByFcltyNm(category, cities.get(0), cities.get(1), cities.get(2), cities.get(3), signgu, keyword, pageRequest);
         }
 
         assert page != null;
