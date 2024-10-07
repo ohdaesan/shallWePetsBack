@@ -6,10 +6,14 @@ import com.ohdaesan.shallwepets.images.service.S3Service;
 import com.ohdaesan.shallwepets.images.domain.dto.ImagesDTO;
 import com.ohdaesan.shallwepets.images.service.ImagesService;
 import com.ohdaesan.shallwepets.member.service.MemberService;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewImagesDTO;
+import com.ohdaesan.shallwepets.review.domain.entity.ReviewImages;
+import com.ohdaesan.shallwepets.review.repository.ReviewImagesRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +33,9 @@ import java.util.*;
 public class ImagesController {
     private final ImagesService imagesService;
     private final MemberService memberService;
+    private final ReviewImagesRepository reviewImagesRepository;
     private final S3Service s3Service;
+    private final ModelMapper modelMapper;
 
     @Operation(summary = "이미지 파일 업로드", description = "이미지 AWS 서버에 업로드")
     @PostMapping("/upload")
@@ -52,6 +58,46 @@ public class ImagesController {
             Images savedImage = imagesService.save(imagesDTO);
 
             return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 업로드 성공", savedImage.getImageNo()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @Operation(summary = "리뷰에 추가할 이미지 파일 업로드", description = "리뷰에 추가할 이미지 AWS 서버에 업로드 후 review_images에 등록")
+    @PostMapping("/uploadReviewImgs")
+    public ResponseEntity<ResponseDTO> uploadReviewImgFiles(@RequestParam Long reviewNo, @RequestParam MultipartFile file) {
+//        System.out.println("🎈🎈💎" + reviewNo);
+//        System.out.println("🎈🎈💎" + file.getOriginalFilename());
+
+        Map<String, String> map = null;
+
+        try {
+//            for (MultipartFile file : files) {
+                map = s3Service.uploadFile(file);
+
+                String imageUrl = map.get("imageUrl");
+                String imageOrigName = map.get("imageOrigName");
+                String imageSavedName = map.get("imageSavedName");
+
+                ImagesDTO imagesDTO = new ImagesDTO();
+                imagesDTO.setImageUrl(imageUrl);
+                imagesDTO.setImageOrigName(imageOrigName);
+                imagesDTO.setImageSavedName(imageSavedName);
+                imagesDTO.setCreatedDate(LocalDateTime.now());
+
+                Images savedImage = imagesService.save(imagesDTO);
+
+                // review_images에 등록
+                ReviewImagesDTO reviewImagesDTO = new ReviewImagesDTO();
+                reviewImagesDTO.setReviewNo(reviewNo);
+                reviewImagesDTO.setImageNo(savedImage.getImageNo());
+
+                ReviewImages reviewImage = modelMapper.map(reviewImagesDTO, ReviewImages.class);
+                reviewImagesRepository.save(reviewImage);
+//            }
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 업로드 성공", "success"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
