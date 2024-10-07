@@ -7,7 +7,7 @@ import com.ohdaesan.shallwepets.message.domain.entity.MessageEntity;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.LocalDateTime;
+import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -46,15 +46,6 @@ public class ChattingRoomController {
         return ResponseEntity.ok(messages);
     }
 
-//    @PostMapping("/save")
-//    public ResponseEntity<MessageEntity> saveMessage(
-//            @RequestParam Long memberNo,
-//            @RequestParam Long chattingRoomNo,
-//            @RequestParam String content) {
-//        MessageEntity message = chattingRoomService.saveMessage(memberNo, chattingRoomNo, content);
-//        return ResponseEntity.ok(message);
-//    }
-
     // 새로운 채팅방 생성
     @PostMapping("/create")
     public ResponseEntity<Map<String, Long>> createChattingRoom(@RequestBody Map<String, Long> members) {
@@ -84,6 +75,12 @@ public class ChattingRoomController {
         return ResponseEntity.ok(response);
     }
 
+    // 모든 채팅방 리스트 조회
+    @GetMapping("/list")
+    public ResponseEntity<List<ChattingRoomEntity>> getChattingRoomList() {
+        List<ChattingRoomEntity> chattingRooms = chattingRoomService.findAllChatRooms(); // 모든 채팅방 조회
+        return ResponseEntity.ok(chattingRooms);
+    }
 
 
 }

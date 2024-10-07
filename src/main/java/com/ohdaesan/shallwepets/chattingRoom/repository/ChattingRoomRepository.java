@@ -16,4 +16,9 @@ public interface ChattingRoomRepository extends JpaRepository<ChattingRoomEntity
     @Query("SELECT c FROM ChattingRoomEntity c WHERE (c.member1.memberNo = :member1Id AND c.member2.memberNo = :member2Id) OR (c.member1.memberNo = :member2Id AND c.member2.memberNo = :member1Id)")
     List<ChattingRoomEntity> findByMember1_IdAndMember2_Id(@Param("member1Id") Long member1Id, @Param("member2Id") Long member2Id);
     //    ChattingRoomEntity findByMember1_IdAndMember2_Id(Long memberNo, Long member2No);
+
+//    // 특정 멤버가 속한 모든 채팅방 조회
+//    @Query("SELECT c FROM ChattingRoomEntity c WHERE c.member1.memberNo = :memberNo OR c.member2.memberNo = :memberNo")
+//    List<ChattingRoomEntity> findByMemberNo(@Param("memberNo") Long memberNo);
+
 }
