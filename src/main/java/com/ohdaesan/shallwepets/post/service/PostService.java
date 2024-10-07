@@ -263,6 +263,19 @@ public class PostService {
         );
     }
 
+    public List<PostDTO> getPostByMemberNo(Long memberNo) {
+        List<Post> posts = postRepository.findByMember_MemberNo(memberNo);
+
+        if (posts.isEmpty()) {
+            throw new RuntimeException("포스트를 찾을 수 없습니다.");
+        }
+
+        List<PostDTO> postDTOs = posts.stream()
+                .map(post -> modelMapper.map(post, PostDTO.class))
+                .collect(Collectors.toList());
+
+        return postDTOs;
+    }
 
 
 

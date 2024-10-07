@@ -15,4 +15,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Object> findByMemberAndPostNo(Member member, Long postNo);
 
     Optional<Object> findByPostNoAndMemberMemberNo(Long postNo, Long memberNo);
+
+    List<Post> findByMember_MemberNo(Long memberNo);
 }

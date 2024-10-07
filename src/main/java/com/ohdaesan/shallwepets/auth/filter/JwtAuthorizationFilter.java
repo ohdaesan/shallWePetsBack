@@ -60,6 +60,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/member/checkNickname",
                 "/member/checkUser",
 //                "/member/memberList",
+//                "/post/getPostByMemberNo/{memberNo}",
                 "/sendMail",
                 "/checkMail",
                 "/sendSms",

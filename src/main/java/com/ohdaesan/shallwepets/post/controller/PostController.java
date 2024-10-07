@@ -57,7 +57,7 @@ public class PostController {
     }
 
     // 전체 폼 List 조회 (front에서 memberNo,awaiting)
-//    @PreAuthorize("hasAnyAuthority('USER') or hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER') or hasAnyAuthority('ADMIN')")
     @Operation(summary = "post 전체 조회", description = "post 전체 조회")
     @GetMapping("/getAllPost")
     public ResponseEntity<ResponseDTO> getAllPost() {
@@ -93,6 +93,18 @@ public class PostController {
 
         return ResponseEntity.ok()
                 .body(new ResponseDTO(200, "폼 수정 성공", responseMap));
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @Operation(summary = "post 조건 조회", description = "memberNo로 조회")
+    @GetMapping("/getPostByMemberNo/{memberNo}")
+    public ResponseEntity<ResponseDTO> getPostByMemberNo(@PathVariable Long memberNo) {
+        List<PostDTO> postList = postService.getPostByMemberNo(memberNo);
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("postList", postList);
+
+        return ResponseEntity.ok()
+                .body(new ResponseDTO(200, "post 전체 조회 성공", responseMap));
     }
 
 
