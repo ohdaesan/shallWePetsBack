@@ -5,7 +5,6 @@ import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.domain.entity.Status;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
-import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
@@ -250,6 +249,7 @@ public class PostService {
 
         // PostDTO 반환
         return new PostDTO(
+                updatePost.getPostNo(),
                 updatePost.getFcltyNm(),
                 updatePost.getCtgryTwoNm(),
                 updatePost.getCtgryThreeNm(),
@@ -334,6 +334,7 @@ public class PostService {
 
         // PostDTO 반환
         return new PostDTO(
+                updatePost.getPostNo(),
                 updatePost.getFcltyNm(),
                 updatePost.getCtgryTwoNm(),
                 updatePost.getCtgryThreeNm(),
