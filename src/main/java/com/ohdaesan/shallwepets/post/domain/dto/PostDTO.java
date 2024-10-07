@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 public class PostDTO {
+    private Long postNo;
     private String fcltyNm;
     private String ctgryTwoNm;
     private String ctgryThreeNm;

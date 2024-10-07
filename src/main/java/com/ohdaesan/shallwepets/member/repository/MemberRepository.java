@@ -43,3 +43,4 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findPostByMemberNo(Long memberNo);
 
 }
+

@@ -2,6 +2,7 @@ package com.ohdaesan.shallwepets.member.controller;
 
 import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
+import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -206,4 +209,17 @@ public class MemberController {
 
         return ResponseEntity.ok().body(new ResponseDTO(200, "email과 전화번호 이용한 멤버 존재 여부 확인 성공", response));
     }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @Operation(summary = "포인트 회원 정보 조회", description = "전체 회원 정보 조회")
+    @GetMapping("/memberList")
+    public ResponseEntity<ResponseDTO> searchMemberList() {
+        List<Member> memberList = memberService.getAllMembers();
+        Map<String, Object> response = new HashMap<>();
+        response.put("members", memberList);
+        response.put("count", memberList.size()); // 회원 수 추가
+
+        return ResponseEntity.ok().body(new ResponseDTO(200, "회원 정보 조회 성공", response));
+    }
+
 }
