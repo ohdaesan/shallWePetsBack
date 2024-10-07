@@ -3,16 +3,21 @@ package com.ohdaesan.shallwepets.member.controller;
 import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.domain.dto.ChangePasswordDTO;
+import com.ohdaesan.shallwepets.member.domain.entity.Member;
+import com.ohdaesan.shallwepets.member.repository.MemberRepository;
+import com.ohdaesan.shallwepets.member.service.MemberService;
 import com.ohdaesan.shallwepets.member.service.MyPageService;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Tag(name = "MyPage")
 @RestController
@@ -29,6 +35,9 @@ import java.util.Map;
 public class MyPageController {
 
     private final MyPageService myPageService;
+    private final MemberService memberService;
+    private final PasswordEncoder passwordEncoder;
+
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/my_info")
@@ -87,10 +96,25 @@ public class MyPageController {
         return ResponseEntity.ok().body(new ResponseDTO(200, message, response));
     }
 
-    @PostMapping("/change_password")
-    public ResponseEntity<ResponseDTO> changePassword(@RequestParam Long memberNo, @RequestBody ChangePasswordDTO changePasswordDTO) {
-        myPageService.changePassword(memberNo, changePasswordDTO);
-        return ResponseEntity.ok(new ResponseDTO(200, "비밀번호가 성공적으로 변경되었습니다.", null));
+    @PostMapping("/{memberNo}/change-password")
+    public ResponseEntity<String> changePassword(@PathVariable Long memberNo, @RequestBody ChangePasswordDTO passwordData) {
+        try {
+            // 회원 정보 조회
+            Member member = memberService.findById(memberNo);
+
+            // 현재 비밀번호 확인
+            if (!passwordEncoder.matches(passwordData.getCurrentPassword(), member.getMemberPwd())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("현재 비밀번호가 일치하지 않습니다.");
+            }
+
+            // 새 비밀번호 변경
+            memberService.updatePassword(member.getMemberId(), passwordData.getNewPassword());
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원을 찾을 수 없습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 변경 중 오류가 발생했습니다.");
+        }
     }
 
 

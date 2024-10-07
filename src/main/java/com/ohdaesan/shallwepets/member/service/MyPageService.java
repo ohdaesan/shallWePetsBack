@@ -14,6 +14,7 @@ import com.ohdaesan.shallwepets.post.domain.entity.PostImages;
 import com.ohdaesan.shallwepets.post.domain.entity.Status;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,9 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +52,10 @@ public class MyPageService {
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private final PostRepository postRepository;
     private final ImagesService imagesService;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private static final Logger logger = LoggerFactory.getLogger(MyPageService.class);
 
 
     public MemberDTO getMemberInfo(Long memberNo) {
@@ -142,7 +151,6 @@ public class MyPageService {
             image = Images.builder()
                     .imageOrigName(file.getOriginalFilename())       // 원본 파일명
                     .imageSavedName(fileName)                        // 저장된 파일명
-                    .imageSavedPath(filePath)                        // 저장된 파일 경로
                     .imageUrl("/images/" + fileName)                // URL 경로 (이 부분은 나중에 실제 서비스에 맞게 변경)
                     .build();
         } else {
@@ -151,7 +159,6 @@ public class MyPageService {
                     .imageNo(image.getImageNo())
                     .imageOrigName(file.getOriginalFilename())
                     .imageSavedName(fileName)
-                    .imageSavedPath(filePath)
                     .imageUrl("/images/" + fileName)  // URL 경로는 실제 서비스에 맞게 수정
                     .build();
         }
@@ -198,43 +205,28 @@ public class MyPageService {
 
     @Transactional
     public void changePassword(Long memberNo, ChangePasswordDTO changePasswordDTO) {
-        Member member = memberRepository.findByMemberNo(memberNo);
-        if (member == null) {
-            throw new NoSuchElementException("회원을 찾을 수 없습니다.");
+        Member member = memberRepository.findById(memberNo)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        logger.debug("Attempting to change password for member: {}", memberNo);
+        logger.debug("Encoded password from DB: {}", member.getMemberPwd());
+        // 주의: 실제 비밀번호를 로그에 출력하지 마세요!
+        logger.debug("Is current password provided: {}", !StringUtils.isEmpty(changePasswordDTO.getCurrentPassword()));
+
+        boolean passwordMatch = passwordEncoder.matches(changePasswordDTO.getCurrentPassword(), member.getMemberPwd());
+        logger.debug("Password match result: {}", passwordMatch);
+
+        if (!passwordEncoder.matches(changePasswordDTO.getCurrentPassword(), member.getMemberPwd())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
         }
 
-        // 현재 비밀번호 확인
-        if (!member.getMemberPwd().equals(changePasswordDTO.getCurrentPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getConfirmNewPassword())) {
+            throw new IllegalArgumentException("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
         }
 
-        // 새 비밀번호 검증
-        String newPassword = changePasswordDTO.getNewPassword();
-        if (newPassword.length() < 8 || newPassword.length() > 20) {
-            throw new IllegalArgumentException("새 비밀번호는 8자 이상 20자 미만이어야 합니다.");
-        }
+        String encodedNewPassword = passwordEncoder.encode(changePasswordDTO.getNewPassword());
+        member.setMemberPwd(encodedNewPassword);
 
-        // 새 비밀번호와 확인 비밀번호가 일치하는지 확인
-        if (!newPassword.equals(changePasswordDTO.getConfirmNewPassword())) {
-            throw new IllegalArgumentException("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-        }
-
-        // 비밀번호 변경
-        Member updatedMember = Member.builder()
-                .memberId(member.getMemberId())
-                .memberPwd(newPassword) // 새로운 비밀번호 설정
-                .memberNickname(member.getMemberNickname())
-                .memberName(member.getMemberName())
-                .memberEmail(member.getMemberEmail())
-                .memberPhone(member.getMemberPhone())
-                .memberDob(member.getMemberDob())
-                .memberRoadAddress(member.getMemberRoadAddress())
-                .memberDetailAddress(member.getMemberDetailAddress())
-                .image(member.getImage())
-                .hasBusinessRegistered(member.isHasBusinessRegistered()) // 추가
-                .build();
-
-        memberRepository.save(updatedMember);
+        memberRepository.save(member);
     }
 
     // 여기서부터 post
