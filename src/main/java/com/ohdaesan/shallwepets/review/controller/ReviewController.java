@@ -146,4 +146,18 @@ public class ReviewController {
         return ResponseEntity.ok()
                 .body(new ResponseDTO(200, "리뷰 삭제 성공", responseMap));
     }
+
+    // 특정 포스트에 대한 리뷰 수 가져오기
+    @GetMapping("/count/{postNo}")
+    public ResponseEntity<Integer> getReviewCountByPostNo(@PathVariable Long postNo) {
+        int reviewCount = reviewService.getReviewCountByPostNo(postNo);
+        return ResponseEntity.ok(reviewCount);
+    }
+
+    // 특정 포스트에 대한 평균 평점 가져오기
+    @GetMapping("/averageRate/{postNo}")
+    public ResponseEntity<Double> getAverageRate(@PathVariable Long postNo) {
+        double averageRate = reviewService.getAverageRateByPostNo(postNo);
+        return ResponseEntity.ok(averageRate);
+    }
 }

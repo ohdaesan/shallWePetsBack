@@ -2,23 +2,24 @@ package com.ohdaesan.shallwepets.post.service;
 
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
+import com.ohdaesan.shallwepets.post.domain.dto.PostSummaryDTO;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.domain.entity.Status;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
-import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
+import com.ohdaesan.shallwepets.review.domain.entity.Review;
+import com.ohdaesan.shallwepets.review.service.ReviewService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PostService {
     private final PostRepository postRepository;
+    private final ReviewService reviewService;
     private final ModelMapper modelMapper;
 
     public PostDTO getPostDetails(Long postNo) {
@@ -188,22 +190,88 @@ public class PostService {
         return new ArrayList<>(signguSet);
     }
 
-    public List<PostDTO> getAllPost() {
-        List<Post> posts = postRepository.findAll();
-        if (posts.isEmpty()) {
-            throw new RuntimeException("포스트를 찾을 수 없습니다.");
+    public Page<PostSummaryDTO> getAllPost(Pageable pageable, String searchTerm, String sort) {
+        // 포스트 정보를 페이지 단위로 조회
+        Page<Post> postPage;
+
+        // 검색어가 있는 경우 포스트를 검색
+        if (searchTerm == null || searchTerm.isEmpty()) {
+            postPage = postRepository.findAll(pageable); // 전체 포스트 조회
+        } else {
+            postPage = postRepository.findByFcltyNmContainingIgnoreCase(searchTerm, pageable); // 검색어에 맞는 포스트 조회
         }
 
-        // List<Post>를 List<PostDTO>로 변환
-        List<PostDTO> postDTOs= posts.stream()
-                .map(post -> modelMapper.map(post, PostDTO.class))
-                .collect(Collectors.toList());
+        // 포스트 정보를 PostSummaryDTO로 변환하면서 리뷰 정보 추가
+        List<PostSummaryDTO> postSummaryDTOs = postPage.getContent().stream().map(post -> {
+            // 리뷰 정보를 가져오기
+            List<Review> reviews = reviewService.getReviewsForPost(post.getPostNo());
+            int reviewCount = reviews.size();
+            double averageRate = reviewService.calculateAverageRateByPostNo(post.getPostNo()); // 메서드 호출
 
+            // PostDTO 생성
+            PostDTO postDTO = PostDTO.builder()
+                    .postNo(post.getPostNo())
+                    .fcltyNm(post.getFcltyNm())
+                    .ctgryTwoNm(post.getCtgryTwoNm())
+                    .ctgryThreeNm(post.getCtgryThreeNm())
+                    .ctyprvnNm(post.getCtyprvnNm())
+                    .signguNm(post.getSignguNm())
+                    .legalDongNm(post.getLegalDongNm())
+                    .liNm(post.getLiNm())
+                    .lnbrNm(post.getLnbrNm())
+                    .roadNm(post.getRoadNm())
+                    .buldNo(post.getBuldNo())
+                    .lcLa(post.getLcLa())
+                    .lcLo(post.getLcLo())
+                    .zipNo(post.getZipNo())
+                    .rdnmadrNm(post.getRdnmadrNm())
+                    .lnmAddr(post.getLnmAddr())
+                    .telNo(post.getTelNo())
+                    .hmpgUrl(post.getHmpgUrl())
+                    .rstdeGuidCn(post.getRstdeGuidCn())
+                    .operTime(post.getOperTime())
+                    .parkngPosblAt(post.getParkngPosblAt())
+                    .utilizaPrcCn(post.getUtilizaPrcCn())
+                    .petPosblAt(post.getPetPosblAt())
+                    .entrnPosblPetSizeValue(post.getEntrnPosblPetSizeValue())
+                    .petLmttMtrCn(post.getPetLmttMtrCn())
+                    .inPlaceAcpPosblAt(post.getInPlaceAcpPosblAt())
+                    .outPlaceAcpPosblAt(post.getOutPlaceAcpPosblAt())
+                    .fcltyInfoDc(post.getFcltyInfoDc())
+                    .petAcpAditChrgeValue(post.getPetAcpAditChrgeValue())
+                    .memberNo(post.getMember().getMemberNo())
+                    .createdDate(post.getCreatedDate())
+                    .status(String.valueOf(post.getStatus()))
+                    .statusExplanation(post.getStatusExplanation())
+                    .viewCount(post.getViewCount())
+                    .build();
 
-        return postDTOs;
+            // PostSummaryDTO 생성 및 반환
+            return PostSummaryDTO.builder()
+                    .postDTO(postDTO)
+                    .reviewCount(reviewCount)
+                    .averageRate(averageRate)
+                    .build();
+        }).collect(Collectors.toList());
+
+        // 정렬 추가
+        if (sort != null) {
+            if ("reviewCount".equals(sort)) {
+                postSummaryDTOs.sort(Comparator.comparingInt(PostSummaryDTO::getReviewCount).reversed());
+            } else if ("averageRate".equals(sort)) {
+                postSummaryDTOs.sort(Comparator.comparingDouble(PostSummaryDTO::getAverageRate).reversed());
+            }
+        }
+
+        return new PageImpl<>(postSummaryDTOs, pageable, postPage.getTotalElements());
     }
 
-// 관리자
+
+
+
+
+
+    // 관리자
     public PostDTO updatePostStatus(Long postNo, PostDTO postDTO) {
         // 게시물 찾기
         Post existingPost = postRepository.findById(postNo)

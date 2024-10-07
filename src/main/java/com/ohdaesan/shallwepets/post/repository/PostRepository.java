@@ -267,4 +267,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Object> findByPostNoAndMemberMemberNo(Long postNo, Long memberNo);
 
     List<Post> findByMember_MemberNo(Long memberNo);
+
+    Page<Post> findAll(Pageable pageable);
+
+    Page<Post> findByFcltyNmContaining(String searchTerm, Pageable pageable);
+
+    Page<Post> findByFcltyNmContainingIgnoreCase(String searchTerm, Pageable pageable);
 }

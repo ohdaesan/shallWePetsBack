@@ -2,6 +2,7 @@ package com.ohdaesan.shallwepets.post.controller;
 
 import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
+import com.ohdaesan.shallwepets.post.domain.dto.PostSummaryDTO;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -173,18 +178,37 @@ public class PostController {
                 .body(new ResponseDTO(201, "업체 등록 신청 성공", responseMap));
     }
 
-    // 전체 폼 List 조회 (front에서 memberNo,awaiting)
-    @PreAuthorize("hasAnyAuthority('USER') or hasAnyAuthority('ADMIN')")
-    @Operation(summary = "post 전체 조회", description = "post 전체 조회")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @Operation(summary = "post 페이징 조회", description = "post를 페이지별로 조회합니다.")
     @GetMapping("/getAllPost")
-    public ResponseEntity<ResponseDTO> getAllPost() {
-        List<PostDTO> postList = postService.getAllPost();
+    public ResponseEntity<ResponseDTO> getPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "최신순") String sort, // 기본 정렬 기준 설정
+            @RequestParam(required = false) String searchTerm // 검색어 추가
+    ) {
+        // Pageable 생성 (정렬 기준은 서비스에서 처리)
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 서비스에서 페이징된 데이터와 검색어를 이용하여 필터링된 데이터를 가져옴
+        Page<PostSummaryDTO> postPage = postService.getAllPost(pageable, searchTerm, sort);
+
         Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("postList", postList);
+        responseMap.put("postList", postPage.getContent());
+        responseMap.put("totalCount", postPage.getTotalElements());
+        responseMap.put("totalPages", postPage.getTotalPages());
 
         return ResponseEntity.ok()
-                .body(new ResponseDTO(200, "post 전체 조회 성공", responseMap));
+                .body(new ResponseDTO(200, "post 페이징 조회 성공", responseMap));
     }
+
+
+
+
+
+
+
+
 
     // 관리자의 폼 수정[반려 or 승인](상태 변경+ 반려사유)
     @PreAuthorize("hasAuthority('ADMIN')")
