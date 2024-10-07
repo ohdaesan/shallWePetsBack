@@ -125,10 +125,10 @@ public class MyPageService {
         Images image = member.getImage();
         if (image == null) {
             image = Images.builder()
-                    .imageOrigName(file.getOriginalFilename())       // 원본 파일명
-                    .imageSavedName(fileName)                        // 저장된 파일명
-                    .imageSavedPath(filePath)                        // 저장된 파일 경로
-                    .imageUrl("/images/" + fileName)                // URL 경로 (이 부분은 나중에 실제 서비스에 맞게 변경)
+                    .imageOrigName(file.getOriginalFilename())  // 원본 파일명
+                    .imageSavedName(fileName)                   // 저장된 파일명
+//                    .imageSavedPath(filePath)                         // 저장된 파일 경로
+                    .imageUrl("/images/" + fileName)            // URL 경로 (이 부분은 나중에 실제 서비스에 맞게 변경)
                     .build();
         } else {
             // 기존 이미지 엔티티가 있을 경우 업데이트
@@ -136,7 +136,7 @@ public class MyPageService {
                     .imageNo(image.getImageNo())
                     .imageOrigName(file.getOriginalFilename())
                     .imageSavedName(fileName)
-                    .imageSavedPath(filePath)
+//                    .imageSavedPath(filePath)
                     .imageUrl("/images/" + fileName)  // URL 경로는 실제 서비스에 맞게 수정
                     .build();
         }
