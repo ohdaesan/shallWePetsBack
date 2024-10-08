@@ -156,9 +156,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 //                Long member1No = ((Number) messageData.get("member1_no")).longValue();
 //                Long member2No = ((Number) messageData.get("member2_no")).longValue();
                 // member1_no 및 member2_no 유효성 검사
-                Long member1No = messageData.containsKey("member1_no") ? ((Number) messageData.get("member1_no")).longValue() : null;
-                Long member2No = messageData.containsKey("member2_no") ? ((Number) messageData.get("member2_no")).longValue() : null;
+//                Long member1No = messageData.containsKey("memberNo") ? ((Number) messageData.get("memberNo")).longValue() : null;
+//                Long member2No = messageData.containsKey("member2No") ? ((Number) messageData.get("member2No")).longValue() : null;
+                Long member1No = messageData.get("member1_no") instanceof Number
+                        ? ((Number) messageData.get("member1_no")).longValue()
+                        : Long.parseLong((String) messageData.get("member1_no"));
 
+                Long member2No = messageData.get("member2_no") instanceof Number
+                        ? ((Number) messageData.get("member2_no")).longValue()
+                        : Long.parseLong((String) messageData.get("member2_no"));
+                System.out.println("채팅을 보낸 사람의 no : " + member1No);
+                System.out.println("채팅을 받는 사람의 no : " + member2No);
 
                 // 회원 ID가 유효한지 확인
                 if (member1No == null || member2No == null) {
@@ -175,6 +183,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 MessageDTO messageDTO = objectMapper.readValue(payload, MessageDTO.class);
                 chattingRoomService.saveMessage(messageDTO.getMemberNo(), messageDTO.getChattingRoomNo(), messageDTO.getContent());
 
+                System.out.println("메시지 전달 동작...");
                 // 연결된 모든 사람에게 메시지 보여주기
                 for (WebSocketSession wsSession : sessions.values()) {
                     if (wsSession.isOpen()) {
@@ -188,7 +197,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             logger.error("JSON 파싱 오류: " + e.getMessage(), e);
         } catch (Exception e) {
             // 일반적인 오류 처리
-            session.sendMessage(new TextMessage("메시지 처리 중 오류가 발생했습니다."));
+            String errorMessage = "{\"error\": \"유효하지 않은 메세지 형식입니다.\"}";
+            session.sendMessage(new TextMessage(errorMessage));
+            // 원래는 payload로 작성
             logger.error("메시지 처리 중 오류 발생: " + e.getMessage(), e);
         }
     }
