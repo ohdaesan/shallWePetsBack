@@ -29,6 +29,7 @@ public class ReviewController {
     private final MemberService memberService;
 
     // 리뷰 작성(Create)
+    @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "리뷰 작성", description = "업로드할 새로운 리뷰 작성")
     @PostMapping("/createReview")
     public ResponseEntity<ResponseDTO> createReview(@RequestBody ReviewDTO reviewDTO) {
@@ -96,7 +97,7 @@ public class ReviewController {
     }
 
     // MemberNo로 리뷰 조회
-//    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "회원 번호로 리뷰 조회", description = "회원 번호로 리뷰 조회")
     @GetMapping("/member/{memberNo}")
     public ResponseEntity<ResponseDTO> getReviewsByMemberNo(@PathVariable Long memberNo) {
@@ -120,7 +121,7 @@ public class ReviewController {
     }
 
     // 리뷰 수정
-//    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "리뷰 수정", description = "리뷰 번호로 리뷰 수정")
     @PutMapping("/{reviewNo}")
     public ResponseEntity<ResponseDTO> updateReview(@PathVariable Long reviewNo, @RequestBody ReviewDTO reviewDTO) {
@@ -133,7 +134,7 @@ public class ReviewController {
     }
 
     // 리뷰 삭제
-//    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "리뷰 삭제", description = "리뷰 번호로 리뷰 삭제")
     @DeleteMapping("/{reviewNo}")
     public ResponseEntity<ResponseDTO> deleteReview(@PathVariable Long reviewNo) {
@@ -144,5 +145,19 @@ public class ReviewController {
 
         return ResponseEntity.ok()
                 .body(new ResponseDTO(200, "리뷰 삭제 성공", responseMap));
+    }
+
+    // 특정 포스트에 대한 리뷰 수 가져오기
+    @GetMapping("/count/{postNo}")
+    public ResponseEntity<Integer> getReviewCountByPostNo(@PathVariable Long postNo) {
+        int reviewCount = reviewService.getReviewCountByPostNo(postNo);
+        return ResponseEntity.ok(reviewCount);
+    }
+
+    // 특정 포스트에 대한 평균 평점 가져오기
+    @GetMapping("/averageRate/{postNo}")
+    public ResponseEntity<Double> getAverageRate(@PathVariable Long postNo) {
+        double averageRate = reviewService.getAverageRateByPostNo(postNo);
+        return ResponseEntity.ok(averageRate);
     }
 }
