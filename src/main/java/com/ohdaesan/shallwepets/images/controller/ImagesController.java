@@ -230,6 +230,24 @@ public class ImagesController {
         }
     }
 
+    @Operation(summary = "리뷰 번호로 관련 이미지들 가져오기", description = "리뷰 번호로 관련 이미지들 가져오기")
+    @PostMapping("/getImagesByReviewNo")
+    public ResponseEntity<ResponseDTO> getImagesByReviewNo(@RequestBody Map<String, String> params) {
+        Long reviewNo = Long.valueOf(params.get("reviewNo"));
+
+        List<Images> images = imagesService.getImagesByReviewNo(reviewNo);
+
+        Map<String, Object> response = new HashMap<>();
+
+        if (images.isEmpty()) {
+            response.put("error", "포스트와 관련된 이미지가 존재하지 않음");
+            return ResponseEntity.ok().body(new ResponseDTO(200, "리뷰 이미지 조회 성공", response));
+        } else {
+            response.put("imageList", images);
+            return ResponseEntity.ok().body(new ResponseDTO(200, "리뷰 이미지 조회 성공", response));
+        }
+    }
+
     @Operation(summary = "포스트 번호로 관련 이미지들 페이징 처리하여 가져오기", description = "포스트 번호로 관련 이미지들 페이징 처리하여 가져오기")
     @PostMapping("/getImagesByPostNoAndPageNo")
     public ResponseEntity<ResponseDTO> getRelatedImagesByPostNoAndPageNo(@RequestBody Map<String, String> params) {

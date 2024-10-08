@@ -97,7 +97,6 @@ public class ReviewController {
     }
 
     // MemberNo로 리뷰 조회
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "회원 번호로 리뷰 조회", description = "회원 번호로 리뷰 조회")
     @GetMapping("/member/{memberNo}")
     public ResponseEntity<ResponseDTO> getReviewsByMemberNo(@PathVariable Long memberNo) {
