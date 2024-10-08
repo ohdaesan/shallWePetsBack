@@ -5,6 +5,7 @@ import com.ohdaesan.shallwepets.images.domain.entity.Images;
 import com.ohdaesan.shallwepets.images.repository.ImagesRepository;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
+import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.domain.entity.PostImages;
 import com.ohdaesan.shallwepets.post.repository.PostImagesRepository;
 import com.ohdaesan.shallwepets.review.domain.entity.ReviewImages;
@@ -12,6 +13,8 @@ import com.ohdaesan.shallwepets.review.repository.ReviewImagesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -72,7 +75,21 @@ public class ImagesService {
         return imagesRepository.findImagesByPostNo(postNo);
     }
 
+    public List<Images> getImagesByReviewNo(Long reviewNo) {
+        return imagesRepository.findImagesByReviewNo(reviewNo);
+    }
+
     public List<Images> getPostImagesByPostNo(Long postNo) {
         return imagesRepository.findPostImagesByPostNo(postNo);
+    }
+
+    public List<Images> getImagesByPostNoAndPageNo(Long postNo, int pageNo) {
+        Page<Images> page = null;
+        PageRequest pageRequest = PageRequest.of(pageNo, 12);
+
+        page = imagesRepository.findImagesByPostNoAndPageNo(postNo, pageRequest);
+        List<Images> images = page.getContent();
+
+        return images;
     }
 }
