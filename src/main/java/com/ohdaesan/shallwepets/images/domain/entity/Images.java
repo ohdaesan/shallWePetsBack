@@ -6,12 +6,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "images")
 @NoArgsConstructor
-//@AllArgsConstructor
+@AllArgsConstructor
 @Getter
-//@Builder
+@Builder
 public class Images {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,10 +22,6 @@ public class Images {
     private String imageUrl;
     private String imageOrigName;
     private String imageSavedName;
-
-    public Images(String imageUrl, String imageOrigName, String imageSavedName) {
-        this.imageUrl = imageUrl;
-        this.imageOrigName = imageOrigName;
-        this.imageSavedName = imageSavedName;
-    }
+    private LocalDateTime createdDate;
+    private LocalDateTime modifiedDate;
 }

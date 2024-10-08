@@ -7,8 +7,9 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class PostImagesDTO {
-    private Long postImageNo;
-    private Long postNo;
-    private Long imageNo;
+@Builder
+public class PostSummaryDTO {
+    private PostDTO postDTO;
+    private int reviewCount;
+    private double averageRate;
 }

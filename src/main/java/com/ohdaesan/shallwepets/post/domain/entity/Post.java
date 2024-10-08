@@ -2,17 +2,17 @@ package com.ohdaesan.shallwepets.post.domain.entity;
 
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "post")
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 @Getter
 @Builder
 public class Post {
@@ -27,12 +27,12 @@ public class Post {
     private LocalDateTime createdDate;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.AWAITING;    // post가 추가될 때 '승인대기' 상태로 올리기
+    private Status status = Status.AWAITING;
 
     private String fcltyNm;
+    private String ctyprvnNm;
     private String ctgryTwoNm;
     private String ctgryThreeNm;
-    private String ctyprvnNm;
     private String signguNm;
     private String legalDongNm;
     private String liNm;
@@ -41,15 +41,15 @@ public class Post {
     private String buldNo;
     private String lcLa;
     private String lcLo;
-    private String zipNo;
-    private String rdnmadrNm;
-    private String lnmAddr;
     private String telNo;
     private String hmpgUrl;
     private String rstdeGuidCn;
     private String operTime;
     private String parkngPosblAt;
     private String utilizaPrcCn;
+    private String rdnmadrNm;
+    private String lnmAddr;
+    private String zipNo;
     private String petPosblAt;
     private String entrnPosblPetSizeValue;
     private String petLmttMtrCn;
@@ -59,4 +59,18 @@ public class Post {
     private String petAcpAditChrgeValue;
     private int viewCount;
     private String statusExplanation;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImages> postImages = new ArrayList<>();
+
+    public void addPostImage(PostImages postImage) {
+        this.postImages.add(postImage);
+        postImage.setPost(this);
+    }
+
+    public void removePostImage(PostImages postImage) {
+        this.postImages.remove(postImage);
+        postImage.setPost(null);
+    }
 }
+

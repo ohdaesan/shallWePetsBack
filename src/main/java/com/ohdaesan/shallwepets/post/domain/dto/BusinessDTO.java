@@ -1,5 +1,4 @@
 package com.ohdaesan.shallwepets.post.domain.dto;
-
 import lombok.*;
 
 @NoArgsConstructor
@@ -7,8 +6,10 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class PostImagesDTO {
-    private Long postImageNo;
+@Builder
+public class BusinessDTO {
     private Long postNo;
-    private Long imageNo;
+    private String fcltyNm;
+    private String rdnmadrNm;
+    private String telNo;
 }

@@ -1,6 +1,7 @@
 package com.ohdaesan.shallwepets.member.service;
 
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
+import com.ohdaesan.shallwepets.member.domain.entity.Grade;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -10,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -22,12 +24,6 @@ public class MemberService {
 
     @Transactional
     public MemberDTO register(MemberDTO memberDTO) {
-        // 중복체크 (optional)
-        // email을 사용자 특정하는데 사용 => 이메일은 중복 X
-
-        // 이메일 중복 체크
-        // DB에서 email로 Member를 조회했을 때 존재하면 Exception 처리
-
         // 비밀번호 암호화
         memberDTO.setMemberPwd(passwordEncoder.encode(memberDTO.getMemberPwd()));
         memberDTO.setMemberRole(/*RoleType.USER*/ "USER");
@@ -45,14 +41,26 @@ public class MemberService {
 
     public String findMemberIdByMemberNameAndMemberEmail(String name, String email) {
         Member member = memberRepository.findMemberByMemberNameAndMemberEmail(name, email)
-                .orElseThrow(() -> new NoSuchElementException("No member found with the provided name and email"));
+                .orElseThrow(() -> new NoSuchElementException("해당 이름과 이메일로 가입한 회원이 존재하지 않습니다."));
         return member.getMemberId();
     }
 
     public String findMemberIdByMemberNameAndMemberPhone(String name, String phone) {
         Member member = memberRepository.findMemberByMemberNameAndMemberPhone(name, phone)
-                .orElseThrow(() -> new NoSuchElementException("No member found with the provided name and phone"));
+                .orElseThrow(() -> new NoSuchElementException("해당 이름과 번호로 가입한 회원이 존재하지 않습니다."));
         return member.getMemberId();
+    }
+
+    public String findNicknameByMemberNo(Long memberNo) {
+        Member member = memberRepository.findMemberByMemberNo(memberNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 번호의 회원이 존재하지 않습니다."));
+        return member.getMemberNickname();
+    }
+
+    public String findGradeByMemberNo(Long memberNo) {
+        Member member = memberRepository.findMemberByMemberNo(memberNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 번호의 회원이 존재하지 않습니다."));
+        return member.getGrade().toString();
     }
 
     public boolean existsByMemberIdAndMemberNameAndMemberEmail(String memberId, String name, String email) {
@@ -106,5 +114,11 @@ public class MemberService {
                 .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다. memberNo:" + memberNo));
     }
 
+    public Long findImageNoById (Long memberNo) {
+        return memberRepository.findImageNoByMemberNo(memberNo);
+    }
 
+    public List<Member> getAllMembers() {
+        return memberRepository.findAll(); // Member 엔티티 리스트를 그대로 반환
+    }
 }

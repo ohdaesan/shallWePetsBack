@@ -2,15 +2,19 @@ package com.ohdaesan.shallwepets.member.controller;
 
 import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
+import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.service.MemberService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -23,6 +27,7 @@ public class MemberController {
     private final MemberService memberService;
 
     // 회원가입 요청
+    @Operation(summary = "회원가입", description = "유저가 입력한 정보를 이용하여 회원가입")
     @PostMapping("/register")
     public ResponseEntity<ResponseDTO> signup(@RequestBody MemberDTO memberDTO) {
         MemberDTO savedMemberDTO = memberService.register(memberDTO);
@@ -32,11 +37,13 @@ public class MemberController {
                 .body(new ResponseDTO(HttpStatus.CREATED, "회원가입 성공", savedMemberDTO));
     }
 
+    @Operation(summary = "로그인", description = "유저가 입력한 정보를 이용하여 로그인")
     @PostMapping("/login")
     @CrossOrigin(origins = "http://localhost:3000")
     public void login(@RequestBody MemberDTO memberDTO) {
     }
 
+    @Operation(summary = "아이디 찾기", description = "유저가 입력한 정보를 이용하여 아이디 찾기")
     @PostMapping("/findId")
     @ResponseBody
     public ResponseEntity<ResponseDTO> findId(@RequestBody Map<String, String> params) {
@@ -66,6 +73,7 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "비밀번호 찾기", description = "유저가 입력한 정보를 이용하여 존재하는 유저인지 확인 (실제 비밀번호를 찾아주지는 않음. 비밀번호 변경만 가능.)")
     @PostMapping("/findPwd")
     @ResponseBody
     public ResponseEntity<ResponseDTO> findPwd(@RequestBody Map<String, String> params) {
@@ -96,6 +104,43 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "닉네임 찾기", description = "회원번호를 이용하여 닉네임 찾기")
+    @PostMapping("/findNickname")
+    public ResponseEntity<ResponseDTO> findNicknameByMemberNo(@RequestBody Map<String, String> params) {
+        Map<String, String> response = new HashMap<>();
+
+        Long memberNo = Long.valueOf(params.get("memberNo"));
+
+        try {
+            String memberNickname = memberService.findNicknameByMemberNo(memberNo);
+            response.put("nickname", memberNickname);
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "닉네임 찾기 성공", response));
+        } catch (NoSuchElementException e) {
+            response.put("error", "닉네임을 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "닉네임 찾기 실패", response));
+        }
+    }
+
+    @Operation(summary = "회원 등급 찾기", description = "회원번호를 이용하여 회원 등급 찾기")
+    @PostMapping("/findGrade")
+    public ResponseEntity<ResponseDTO> findGradeByMemberNo(@RequestBody Map<String, String> params) {
+        Map<String, String> response = new HashMap<>();
+
+        Long memberNo = Long.valueOf(params.get("memberNo"));
+
+        try {
+            String memberGrade = memberService.findGradeByMemberNo(memberNo);
+            response.put("grade", memberGrade);
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "회원 등급 찾기 성공", response));
+        } catch (NoSuchElementException e) {
+            response.put("error", "회원 등급을 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO(HttpStatus.NOT_FOUND, "회원 등급 찾기 실패", response));
+        }
+    }
+
+    @Operation(summary = "로그인하지 않은 상태에서 비밀번호 변경", description = "비밀번호 찾기에서 존재하는 회원인지 확인되면 비밀번호 변경")
     @PostMapping("/changePwdNotLoggedIn")
     public ResponseEntity<ResponseDTO> changePwNotLoggedIn(@RequestBody Map<String, String> params) {
         Map<String, String> response = new HashMap<>();
@@ -131,6 +176,7 @@ public class MemberController {
         return ResponseEntity.ok().body(new ResponseDTO(200, "비밀번호 변경 성공", response));
     }
 
+    @Operation(summary = "아이디 중복 확인", description = "이미 존재하는 아이디인지 확인")
     @GetMapping("/checkId")
     public ResponseEntity<ResponseDTO> checkMemberId(@RequestParam String memberId) {
         boolean exists = memberService.existsMemberId(memberId);
@@ -139,6 +185,7 @@ public class MemberController {
         return ResponseEntity.ok().body(new ResponseDTO(200, "memberId 존재 여부 확인 성공", response));
     }
 
+    @Operation(summary = "닉네임 중복 확인", description = "이미 존재하는 닉네임인지 확인")
     @GetMapping("/checkNickname")
     public ResponseEntity<ResponseDTO> checkNickname(@RequestParam String memberNickname) {
         boolean exists = memberService.existsNickname(memberNickname);
@@ -147,6 +194,7 @@ public class MemberController {
         return ResponseEntity.ok().body(new ResponseDTO(200, "memberNickname 존재 여부 확인 성공", response));
     }
 
+    @Operation(summary = "이미 가입한 이력이 있는 회원인지 확인", description = "이메일과 전화번호를 이용하여 이미 가입한 이력이 있는 회원인지 확인")
     @GetMapping("/checkUser")
     public ResponseEntity<ResponseDTO> checkUser(
             @RequestParam String memberEmail,
@@ -161,4 +209,17 @@ public class MemberController {
 
         return ResponseEntity.ok().body(new ResponseDTO(200, "email과 전화번호 이용한 멤버 존재 여부 확인 성공", response));
     }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @Operation(summary = "포인트 회원 정보 조회", description = "전체 회원 정보 조회")
+    @GetMapping("/memberList")
+    public ResponseEntity<ResponseDTO> searchMemberList() {
+        List<Member> memberList = memberService.getAllMembers();
+        Map<String, Object> response = new HashMap<>();
+        response.put("members", memberList);
+        response.put("count", memberList.size()); // 회원 수 추가
+
+        return ResponseEntity.ok().body(new ResponseDTO(200, "회원 정보 조회 성공", response));
+    }
+
 }
