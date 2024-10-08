@@ -123,7 +123,7 @@ public class ReviewController {
     // 리뷰 수정
     @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "리뷰 수정", description = "리뷰 번호로 리뷰 수정")
-    @PutMapping("/{reviewNo}")
+    @PutMapping("/update/{reviewNo}")
     public ResponseEntity<ResponseDTO> updateReview(@PathVariable Long reviewNo, @RequestBody ReviewDTO reviewDTO) {
         ReviewDTO updatedReview = reviewService.updateReview(reviewNo, reviewDTO);
         Map<String, Object> responseMap = new HashMap<>();
@@ -136,7 +136,7 @@ public class ReviewController {
     // 리뷰 삭제
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "리뷰 삭제", description = "리뷰 번호로 리뷰 삭제")
-    @DeleteMapping("/{reviewNo}")
+    @DeleteMapping("/delete/{reviewNo}")
     public ResponseEntity<ResponseDTO> deleteReview(@PathVariable Long reviewNo) {
         reviewService.deleteReview(reviewNo);
 
