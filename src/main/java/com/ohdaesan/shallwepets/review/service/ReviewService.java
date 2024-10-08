@@ -298,4 +298,21 @@ public class ReviewService {
 
         return reviewDTOList;
     }
+
+    // 특정 포스트에 대한 리뷰 수 가져오기
+    public int getReviewCountByPostNo(Long postNo) {
+        return reviewRepository.countByPostPostNo(postNo);
+    }
+
+    // 특정 포스트에 대한 평균 평점 가져오기
+    public double calculateAverageRateByPostNo(Long postNo) {
+        Double averageRate = reviewRepository.findAverageRateByPostNo(postNo);
+        return averageRate != null ? averageRate : 0.0; // null 처리
+    }
+
+
+    public List<Review> getReviewsForPost(Long postNo) {
+        return reviewRepository.findByPostPostNo(postNo);
+    }
+
 }
