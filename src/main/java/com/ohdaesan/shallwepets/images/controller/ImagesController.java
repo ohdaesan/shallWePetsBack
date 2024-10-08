@@ -67,13 +67,9 @@ public class ImagesController {
     @Operation(summary = "리뷰에 추가할 이미지 파일 업로드", description = "리뷰에 추가할 이미지 AWS 서버에 업로드 후 review_images에 등록")
     @PostMapping("/uploadReviewImgs")
     public ResponseEntity<ResponseDTO> uploadReviewImgFiles(@RequestParam Long reviewNo, @RequestParam MultipartFile file) {
-//        System.out.println("🎈🎈💎" + reviewNo);
-//        System.out.println("🎈🎈💎" + file.getOriginalFilename());
-
         Map<String, String> map = null;
 
         try {
-//            for (MultipartFile file : files) {
                 map = s3Service.uploadFile(file);
 
                 String imageUrl = map.get("imageUrl");
@@ -95,7 +91,6 @@ public class ImagesController {
 
                 ReviewImages reviewImage = modelMapper.map(reviewImagesDTO, ReviewImages.class);
                 reviewImagesRepository.save(reviewImage);
-//            }
 
             return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 업로드 성공", "success"));
         } catch (IOException e) {
@@ -206,7 +201,7 @@ public class ImagesController {
         return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 조회 성공", response));
     }
 
-    @Operation(summary = "포스트 번호로 관련 이미지들 가져오기", description = "포스트 번호로 관련 이미지들 가져오기")
+    @Operation(summary = "포스트 번호로 관련 이미지들 특정 개수만큼 가져오기", description = "포스트 번호로 관련 이미지들 특정 개수만큼 가져오기")
     @PostMapping("/getImagesByPostNo")
     public ResponseEntity<ResponseDTO> getRelatedImagesByPostNo(@RequestBody Map<String, String> params) {
         Long postNo = Long.valueOf(params.get("postNo"));
@@ -230,6 +225,27 @@ public class ImagesController {
             } else {            // -1이면 전체 리스트 반환
                 response.put("imageList", images);
             }
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 조회 성공", response));
+        }
+    }
+
+    @Operation(summary = "포스트 번호로 관련 이미지들 페이징 처리하여 가져오기", description = "포스트 번호로 관련 이미지들 페이징 처리하여 가져오기")
+    @PostMapping("/getImagesByPostNoAndPageNo")
+    public ResponseEntity<ResponseDTO> getRelatedImagesByPostNoAndPageNo(@RequestBody Map<String, String> params) {
+        Long postNo = Long.valueOf(params.get("postNo"));
+        int pageNo = Integer.parseInt(params.get("pageNo"));
+
+        List<Images> images = imagesService.getImagesByPostNoAndPageNo(postNo, pageNo);
+
+        Map<String, Object> response = new HashMap<>();
+
+        if (images.isEmpty()) {
+            response.put("error", "포스트와 관련된 이미지가 존재하지 않음");
+
+            return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 조회 성공", response));
+        } else {
+            response.put("imageList", images);
 
             return ResponseEntity.ok().body(new ResponseDTO(200, "이미지 조회 성공", response));
         }
