@@ -75,6 +75,10 @@ public class ImagesService {
         return imagesRepository.findImagesByPostNo(postNo);
     }
 
+    public List<Images> getImagesByReviewNo(Long reviewNo) {
+        return imagesRepository.findImagesByReviewNo(reviewNo);
+    }
+
     public List<Images> getPostImagesByPostNo(Long postNo) {
         return imagesRepository.findPostImagesByPostNo(postNo);
     }

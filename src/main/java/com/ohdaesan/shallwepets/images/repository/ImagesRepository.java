@@ -27,6 +27,12 @@ public interface ImagesRepository extends JpaRepository<Images, Long> {
     List<Images> findImagesByPostNo(@Param("postNo") Long postNo);
 
     @Query("SELECT i FROM Images i " +
+            "JOIN ReviewImages ri ON i.imageNo = ri.image.imageNo " +
+            "JOIN Review r ON ri.review.reviewNo = r.reviewNo " +
+            "WHERE r.reviewNo = :reviewNo")
+    List<Images> findImagesByReviewNo(@Param("reviewNo") Long reviewNo);
+
+    @Query("SELECT i FROM Images i " +
             "JOIN PostImages pi ON i.imageNo = pi.image.imageNo " +
             "WHERE pi.post.postNo = :postNo " +
             "ORDER BY i.createdDate DESC")
