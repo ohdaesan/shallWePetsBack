@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -102,13 +103,18 @@ public class MyPageController {
             // 회원 정보 조회
             Member member = memberService.findById(memberNo);
 
+            // 로그 출력
+            log.info("Current Password: {}", passwordData.getCurrentPassword());
+            log.info("Encoded Password from DB: {}", member.getMemberPwd());
+
             // 현재 비밀번호 확인
             if (!passwordEncoder.matches(passwordData.getCurrentPassword(), member.getMemberPwd())) {
+                log.info("기존 비밀번호와 입력된 비밀번호가 일치하지 않음..");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("현재 비밀번호가 일치하지 않습니다.");
             }
 
             // 새 비밀번호 변경
-            memberService.updatePassword(member.getMemberId(), passwordData.getNewPassword());
+            myPageService.changePassword(memberNo, passwordData);
             return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원을 찾을 수 없습니다.");
@@ -124,21 +130,19 @@ public class MyPageController {
     @Operation(summary = "업체 등록", description = "사용자가 입력한 정보를 이용하여 업체 등록")
     @PostMapping("/businessregister")
     public ResponseEntity<ResponseDTO> registerPost(
-            @RequestPart("postDTO") PostDTO postDTO,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @RequestParam("memberNo") Long memberNo) {
-
+            @RequestParam Map<String, String> postDTO,
+            @RequestParam("memberNo") Long memberNo,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         try {
-            PostDTO registeredPost = myPageService.registerPost(postDTO, images, memberNo);
+            PostDTO postDTOObj = new PostDTO();
+            // Map the received parameters to PostDTO object
+            BeanUtils.copyProperties(postDTO, postDTOObj);
+
+            PostDTO registeredPost = myPageService.registerPost(postDTOObj, images, memberNo);
             return ResponseEntity.ok()
                     .body(new ResponseDTO(HttpStatus.CREATED.value(), "업체 등록 신청 성공", registeredPost));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.value(), "파일 업로드 중 오류가 발생했습니다", null));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(new ResponseDTO(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null));
         } catch (Exception e) {
+            // Error handling (unchanged)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 오류가 발생했습니다", null));
         }

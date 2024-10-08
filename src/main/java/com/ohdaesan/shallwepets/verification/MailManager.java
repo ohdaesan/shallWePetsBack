@@ -9,21 +9,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MailManager {
-    @Value("${spring.mail.username}")
-    private String sender;
-
-    @Autowired
-    private JavaMailSender javaMailSender;
-
-    public void send(String sendTo, String sub, String con) throws Exception {
-        // HTML 태그 그대로 전송하는 방법
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        mimeMessage.setFrom(sender);
-
-        // 받는 사람
-        mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(sendTo));
-        mimeMessage.setSubject(sub);
-        mimeMessage.setText(con);
-        javaMailSender.send(mimeMessage);
-    }
+//    @Value("${spring.mail.username}")
+//    private String sender;
+//
+//    @Autowired
+////    private JavaMailSender javaMailSender;
+//
+//    public void send(String sendTo, String sub, String con) throws Exception {
+//        // HTML 태그 그대로 전송하는 방법
+////        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+//        mimeMessage.setFrom(sender);
+//
+//        // 받는 사람
+//        mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(sendTo));
+//        mimeMessage.setSubject(sub);
+//        mimeMessage.setText(con);
+////        javaMailSender.send(mimeMessage);
+//    }
 }

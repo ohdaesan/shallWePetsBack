@@ -207,13 +207,6 @@ public class MyPageService {
     public void changePassword(Long memberNo, ChangePasswordDTO changePasswordDTO) {
         Member member = memberRepository.findById(memberNo)
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
-        logger.debug("Attempting to change password for member: {}", memberNo);
-        logger.debug("Encoded password from DB: {}", member.getMemberPwd());
-        // 주의: 실제 비밀번호를 로그에 출력하지 마세요!
-        logger.debug("Is current password provided: {}", !StringUtils.isEmpty(changePasswordDTO.getCurrentPassword()));
-
-        boolean passwordMatch = passwordEncoder.matches(changePasswordDTO.getCurrentPassword(), member.getMemberPwd());
-        logger.debug("Password match result: {}", passwordMatch);
 
         if (!passwordEncoder.matches(changePasswordDTO.getCurrentPassword(), member.getMemberPwd())) {
             throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
