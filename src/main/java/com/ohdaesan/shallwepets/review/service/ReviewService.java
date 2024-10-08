@@ -1,5 +1,6 @@
 package com.ohdaesan.shallwepets.review.service;
 
+import com.ohdaesan.shallwepets.images.service.ImagesService;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
@@ -10,6 +11,8 @@ import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
 import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
 import com.ohdaesan.shallwepets.review.domain.entity.Review;
+import com.ohdaesan.shallwepets.review.domain.entity.ReviewImages;
+import com.ohdaesan.shallwepets.review.repository.ReviewImagesRepository;
 import com.ohdaesan.shallwepets.review.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,8 +37,10 @@ public class ReviewService {
     private final PostRepository postRepository;
     private final ModelMapper modelMapper; // ModelMapper 주입
     private final PointRepository pointRepository;
+    private final ReviewImagesRepository reviewImagesRepository;
 
     private final PointService pointService;
+    private final ImagesService imagesService;
 
     @Transactional
     public Long createReview(ReviewDTO reviewDTO) {
@@ -224,6 +230,13 @@ public class ReviewService {
         // 리뷰 넘버에 해당하는 리뷰 가져오기
         Review review = reviewRepository.findById(reviewNo)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewNo));
+
+        Set<ReviewImages> reviewImages = review.getReviewImages();
+        reviewImagesRepository.deleteAll(reviewImages);
+
+        for (ReviewImages reviewImage : reviewImages) {
+            imagesService.delete(reviewImage.getImage().getImageNo());
+        }
 
         // 특정 멤버의 포인트 적립 취소
         Member member = review.getMember();

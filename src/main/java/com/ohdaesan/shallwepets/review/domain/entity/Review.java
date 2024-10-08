@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "review")
@@ -33,4 +34,7 @@ public class Review {
     private String content;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ReviewImages> reviewImages;
 }
