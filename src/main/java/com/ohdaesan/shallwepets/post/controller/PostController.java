@@ -169,9 +169,13 @@ public class PostController {
     @Operation(summary = "업체 등록", description = "user의 업체 등록")
     @PostMapping("/registerPost")
     public ResponseEntity<ResponseDTO> registerPost(@RequestBody PostDTO postDTO) {
+
+        log.info(String.valueOf(postDTO));
+
         PostDTO post = postService.registerPost(postDTO);
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("post", post);
+
 
         return ResponseEntity
                 .ok()

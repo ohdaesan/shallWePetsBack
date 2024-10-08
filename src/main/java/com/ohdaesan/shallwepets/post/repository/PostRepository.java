@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-//    List<Post> findByCtgryTwoNmAndCtyprvnNmContains(String ctgryTwoNm, String ctyprvnNm);
+    List<Post> findByCtgryTwoNmAndCtyprvnNmContains(String ctgryTwoNm, String ctyprvnNm);
 
     // ctyprvnNm이 하나일 때
     @Query("SELECT p FROM Post p WHERE p.ctgryTwoNm = :ctgryTwoNm AND " +

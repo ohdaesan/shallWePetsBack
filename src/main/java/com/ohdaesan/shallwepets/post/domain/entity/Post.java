@@ -48,7 +48,6 @@ public class Post {
     private String parkngPosblAt;
     private String utilizaPrcCn;
     private String rdnmadrNm;
-    private String petInfoCn;
     private String lnmAddr;
     private String zipNo;
     private String detailAddress;
