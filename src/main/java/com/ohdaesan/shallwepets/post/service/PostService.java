@@ -431,6 +431,14 @@ public class PostService {
                 .build()).collect(Collectors.toList());
     }
 
+    public Long deletePost(Long postNo) {
+        // 게시글 삭제
+        postRepository.deleteById(postNo);
+
+        // 삭제된 게시글의 postNo 반환
+        return postNo;
+    }
+
 
 
 }

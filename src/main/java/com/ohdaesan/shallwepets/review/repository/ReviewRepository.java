@@ -16,7 +16,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // Fetch reviews by Post entity
     List<Review> findByMember(Member member);
 
-
     List<Review> findByPost_PostNo(Long postNo);
 
     int countByPostPostNo(Long postNo); // 특정 포스트에 대한 리뷰 수

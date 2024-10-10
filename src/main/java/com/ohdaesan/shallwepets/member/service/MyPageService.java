@@ -13,6 +13,13 @@ import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.domain.entity.PostImages;
 import com.ohdaesan.shallwepets.post.domain.entity.Status;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
+import com.ohdaesan.shallwepets.review.domain.dto.ExtendedReviewDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewImagesDTO;
+import com.ohdaesan.shallwepets.review.domain.entity.Review;
+import com.ohdaesan.shallwepets.review.domain.entity.ReviewImages;
+import com.ohdaesan.shallwepets.review.repository.ReviewImagesRepository;
+import com.ohdaesan.shallwepets.review.repository.ReviewRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +61,10 @@ public class MyPageService {
     private final ImagesService imagesService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final ReviewRepository reviewRepository;
+
+    private final ReviewImagesRepository reviewImagesRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(MyPageService.class);
 
@@ -266,7 +277,6 @@ public class MyPageService {
 //
 //    }
 
-}
 
 //    public PostDTO getBusinessDetail(Long postNo, Long memberNo) {
 //        Post post = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
@@ -330,3 +340,49 @@ public class MyPageService {
 //    }
 //
 //
+
+    // 내 리뷰 찾아오기
+
+
+    public List<ReviewDTO> getMemberReviewsByMemberNo(Long memberNo) {
+        Member member = memberRepository.findByMemberNo(memberNo);
+        if (member == null) {
+            throw new NoSuchElementException("회원을 찾을 수 없습니다.");
+        }
+        List<Review> reviews = reviewRepository.findByMember(member);
+        return reviews.stream()
+                .map(this::convertToExtendedReviewDTO)
+                .collect(Collectors.toList());
+    }
+
+    private ReviewDTO convertToExtendedReviewDTO(Review review) {
+        // ModelMapper 명시적 매핑 설정
+        modelMapper.typeMap(Review.class, ReviewDTO.class)
+                .addMappings(mapper -> mapper.map(src -> src.getPost().getPostNo(), ReviewDTO::setPostNo));
+
+        // Review 엔티티를 ReviewDTO로 매핑
+        ReviewDTO reviewDTO = modelMapper.map(review, ReviewDTO.class);
+
+        // ExtendedReviewDTO 생성
+        ExtendedReviewDTO extendedReviewDTO = new ExtendedReviewDTO(reviewDTO);
+
+        // 리뷰 이미지 DTO 생성
+        List<ReviewImagesDTO> reviewImagesDTOs = review.getReviewImages().stream()
+                .map(this::convertToReviewImagesDTO)
+                .collect(Collectors.toList());
+        extendedReviewDTO.setReviewImages(reviewImagesDTOs);
+
+        return extendedReviewDTO;
+    }
+
+    private ReviewImagesDTO convertToReviewImagesDTO(ReviewImages reviewImage) {
+        ReviewImagesDTO dto = new ReviewImagesDTO();
+        dto.setReviewImageNo(reviewImage.getReviewImageNo());
+        dto.setReviewNo(reviewImage.getReview().getReviewNo());
+        dto.setImageNo(reviewImage.getImage().getImageNo());
+        return dto;
+    }
+}
+
+
+

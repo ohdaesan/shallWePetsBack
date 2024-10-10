@@ -8,6 +8,10 @@ import com.ohdaesan.shallwepets.member.repository.MemberRepository;
 import com.ohdaesan.shallwepets.member.service.MemberService;
 import com.ohdaesan.shallwepets.member.service.MyPageService;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewImagesDTO;
+import com.ohdaesan.shallwepets.review.domain.entity.Review;
+import com.ohdaesan.shallwepets.review.repository.ReviewRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Tag(name = "MyPage")
 @RestController
@@ -40,6 +45,8 @@ public class MyPageController {
     private final MyPageService myPageService;
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
+    private final ReviewRepository reviewRepository;
 
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
@@ -129,8 +136,6 @@ public class MyPageController {
     // 여기서부터 post
 
 
-}
-
 //    // 업체 등록
 //    @Operation(summary = "업체 등록", description = "사용자가 입력한 정보를 이용하여 업체 등록")
 //    @PostMapping("/businessregister")
@@ -175,5 +180,18 @@ public class MyPageController {
 //        myPageService.deleteBusiness(postNo, memberNo);
 //        return ResponseEntity.noContent().build();  // 삭제 성공 시 204 No Content 응답
 //    }
+
+
+    // 여기서부턴 내 리뷰
+
+    // MemberNo로 리뷰 조회
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping("/myreviewlist")
+    public ResponseEntity<ResponseDTO> getMemberReviews(@RequestParam Long memberNo) {
+        List<ReviewDTO> reviews = myPageService.getMemberReviewsByMemberNo(memberNo);
+        return ResponseEntity.ok().body(new ResponseDTO(200, "회원 리뷰 목록 조회 성공", reviews));
+    }
+
+}
 
 
