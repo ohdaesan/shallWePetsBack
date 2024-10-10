@@ -18,6 +18,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -126,27 +128,30 @@ public class MyPageController {
 
     // 여기서부터 post
 
-    // 업체 등록
-    @Operation(summary = "업체 등록", description = "사용자가 입력한 정보를 이용하여 업체 등록")
-    @PostMapping("/businessregister")
-    public ResponseEntity<ResponseDTO> registerPost(
-            @RequestParam Map<String, String> postDTO,
-            @RequestParam("memberNo") Long memberNo,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
-        try {
-            PostDTO postDTOObj = new PostDTO();
-            // Map the received parameters to PostDTO object
-            BeanUtils.copyProperties(postDTO, postDTOObj);
 
-            PostDTO registeredPost = myPageService.registerPost(postDTOObj, images, memberNo);
-            return ResponseEntity.ok()
-                    .body(new ResponseDTO(HttpStatus.CREATED.value(), "업체 등록 신청 성공", registeredPost));
-        } catch (Exception e) {
-            // Error handling (unchanged)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 오류가 발생했습니다", null));
-        }
-    }
+}
+
+//    // 업체 등록
+//    @Operation(summary = "업체 등록", description = "사용자가 입력한 정보를 이용하여 업체 등록")
+//    @PostMapping("/businessregister")
+//    public ResponseEntity<ResponseDTO> registerPost(
+//            @RequestParam Map<String, String> postDTO,
+//            @RequestParam("memberNo") Long memberNo,
+//            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+//        try {
+//            PostDTO postDTOObj = new PostDTO();
+//            // Map the received parameters to PostDTO object
+//            BeanUtils.copyProperties(postDTO, postDTOObj);
+//
+//            PostDTO registeredPost = myPageService.registerPost(postDTOObj, images, memberNo);
+//            return ResponseEntity.ok()
+//                    .body(new ResponseDTO(HttpStatus.CREATED.value(), "업체 등록 신청 성공", registeredPost));
+//        } catch (Exception e) {
+//            // Error handling (unchanged)
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 오류가 발생했습니다", null));
+//        }
+//    }
 
 
 //    @GetMapping("/mybusinesslist/{postNo}")
@@ -171,4 +176,4 @@ public class MyPageController {
 //        return ResponseEntity.noContent().build();  // 삭제 성공 시 204 No Content 응답
 //    }
 
-}
+

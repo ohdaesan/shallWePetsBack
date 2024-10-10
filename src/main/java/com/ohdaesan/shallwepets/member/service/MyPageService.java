@@ -224,47 +224,47 @@ public class MyPageService {
 
     // 여기서부터 post
 
-    //user의 업체 등록 신청
-    @Transactional
-    public PostDTO registerPost(PostDTO postDTO, List<MultipartFile> images, Long memberNo) throws IOException {
-        // Set creation date
-        postDTO.setCreatedDate(LocalDateTime.now());
-
-        // Set initial status
-        postDTO.setStatus(String.valueOf(Status.AWAITING));
-
-        // Find member
-        Member member = memberRepository.findById(memberNo)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
-        // Map DTO to entity
-        Post post = modelMapper.map(postDTO, Post.class);
-        post.setMember(member);
-
-        // Save post
-        Post savedPost = postRepository.save(post);
-
-        // Handle image uploads
-        if (images != null && !images.isEmpty()) {
-            for (MultipartFile image : images) {
-                ImagesDTO imageDTO = new ImagesDTO();
-                // 이미지 정보 설정 (파일 이름, 크기 등)
-                imageDTO.setImageOrigName(image.getOriginalFilename());
-                // 여기에 필요한 다른 이미지 정보 설정
-
-                Images savedImage = imagesService.save(imageDTO);
-
-                PostImages postImage = new PostImages();
-                postImage.setPost(savedPost);
-                postImage.setImage(savedImage);
-                savedPost.addPostImage(postImage);
-            }
-        }
-
-        // Map saved entity back to DTO
-        return modelMapper.map(savedPost, PostDTO.class);
-
-    }
+//    //user의 업체 등록 신청
+//    @Transactional
+//    public PostDTO registerPost(PostDTO postDTO, List<MultipartFile> images, Long memberNo) throws IOException {
+//        // Set creation date
+//        postDTO.setCreatedDate(LocalDateTime.now());
+//
+//        // Set initial status
+//        postDTO.setStatus(String.valueOf(Status.AWAITING));
+//
+//        // Find member
+//        Member member = memberRepository.findById(memberNo)
+//                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+//
+//        // Map DTO to entity
+//        Post post = modelMapper.map(postDTO, Post.class);
+//        post.setMember(member);
+//
+//        // Save post
+//        Post savedPost = postRepository.save(post);
+//
+//        // Handle image uploads
+//        if (images != null && !images.isEmpty()) {
+//            for (MultipartFile image : images) {
+//                ImagesDTO imageDTO = new ImagesDTO();
+//                // 이미지 정보 설정 (파일 이름, 크기 등)
+//                imageDTO.setImageOrigName(image.getOriginalFilename());
+//                // 여기에 필요한 다른 이미지 정보 설정
+//
+//                Images savedImage = imagesService.save(imageDTO);
+//
+//                PostImages postImage = new PostImages();
+//                postImage.setPost(savedPost);
+//                postImage.setImage(savedImage);
+//                savedPost.addPostImage(postImage);
+//            }
+//        }
+//
+//        // Map saved entity back to DTO
+//        return modelMapper.map(savedPost, PostDTO.class);
+//
+//    }
 
 }
 
