@@ -18,6 +18,10 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
 //    List<Post> findByCtgryTwoNmAndCtyprvnNmContains(String ctgryTwoNm, String ctyprvnNm);
 
+    @Query("SELECT p FROM Post p " +
+            "ORDER BY p.fcltyNm")
+    Page<Post> findAllPostsAdmin(Pageable pageable);
+
     // ctyprvnNm이 하나일 때
     @Query("SELECT p FROM Post p WHERE p.ctgryTwoNm = :ctgryTwoNm AND " +
             "p.ctyprvnNm LIKE CONCAT('%', :ctyprvnNm, '%') AND " +
@@ -280,5 +284,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     List<Post> findByStatusNot(Status status);
-
 }
