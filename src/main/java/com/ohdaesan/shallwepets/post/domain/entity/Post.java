@@ -72,5 +72,6 @@ public class Post {
         this.postImages.remove(postImage);
         postImage.setPost(null);
     }
+
 }
 
