@@ -45,6 +45,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     * */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+
+        // 요청 URI 로그 출력
+        System.out.println("Request URI: " + request.getRequestURI());
+
+        // 필터가 호출되었는지 확인
+        System.out.println("JwtAuthorizationFilter가 호출되었습니다.");
+
         /*
          * 권한이 필요없는 리소스 추출
          * */
@@ -69,6 +76,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/images/findImageByNo",
                 "/images/getImageByMemberNo/(.*)",
                 "/images/getImagesByPostNo",
+                "/images/getImagesByReviewNo",
+                "/images/getImagesByPostNoAndPageNo",
                 "/import-csv",
                 "/post/\\d+",
                 "/post/getList",
@@ -76,6 +85,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/post/getSearchedList",
                 "/post/getFilteredSearchedList",
                 "/post/getSigngu",
+                "/review/member/\\d+",
                 "/review/reviews",
                 "/review/\\d+",
                 "/review/post/\\d+",
@@ -86,7 +96,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 "/v3/api-docs",              // swagger 설정
                 "/v3/api-docs/(.*)",         // swagger 설정
                 "/swagger-resources",        // swagger 설정
-                "/swagger-resources/(.*)"    // swagger 설정
+                "/swagger-resources/(.*)",  // swagger 설정
+                "/chat"
+//                "/chattingRoom/create",
+//                "/chattingRoom/message"
+//                "/ws/(.*)"
+
         );
         /*
         * 정규표현식 패턴
@@ -116,6 +131,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         // 헤더에서 토큰 꺼내기
         String header = request.getHeader(AuthConstants.AUTH_HEADER);
+        System.out.println("Header: " + header); // 헤더 값 로그 출력
+
 
         // 유효한 토큰인지 확인
         try {
@@ -132,10 +149,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
                     // 토큰에 담긴 정보로 Member 객체를 만든다.
                     // (SecurityContext에 등록될 인증 객체(UserDetail)을 만들기 위해)
+                    Long memberNo = claims.get("memberNo", Long.class); // 채팅방 생성할 때 멤버 넘버 가져오기 위해 추가
                     Member member = Member.builder()
                             .memberId(claims.get("memberName").toString())
                             .memberEmail(claims.get("memberEmail").toString())
                             .memberRole(RoleType.valueOf(claims.get("memberRole").toString()))
+                            // 채팅을 실행할 때 멤버 넘버를 가져오기 위한 메서드 추가
+                            .memberNo(memberNo)
                             .build();
 
                     // 토큰에 담겨있던 정보로 인증 객체를 만든다.
@@ -189,7 +209,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         else if (e instanceof JwtException) {
             resultMsg = "TOKEN Parsing JwtException";
         }
-        // 이외 JTW 토큰내에서 오류 발생
+        // 이외 JWT 토큰내에서 오류 발생
         else {
             System.out.println(e.getMessage());
             resultMsg = "OTHER TOKEN ERROR";

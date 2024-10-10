@@ -44,6 +44,10 @@ public class Member {
     @JoinColumn(name = "image_no")
     private Images image;
 
+    public Long getId() {
+        return this.memberNo;
+    }
+
     private boolean hasBusinessRegistered;
 
 }

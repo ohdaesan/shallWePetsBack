@@ -1,5 +1,6 @@
 package com.ohdaesan.shallwepets.auth.util;
 
+import com.ohdaesan.shallwepets.auth.common.AuthConstants;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import io.jsonwebtoken.*;
 import jakarta.xml.bind.DatatypeConverter;
@@ -38,11 +39,22 @@ public class TokenUtils {
      * @return token: Authorization의 token 부분을 반환한다.
      * */
     public static String splitHeader(String header){
-        if(!header.equals("")){
-            return header.split(" ")[1];    // 'bearer' 제외한 토큰
-        } else {
-            return null;
+//        if(!header.equals("")){
+//            return header.split(" ")[1];    // 'bearer' 제외한 토큰
+//        } else {
+//            return null;
+//        }
+//         헤더가 null이 아니고 비어있지 않은지 확인
+        if (header != null && !header.isEmpty()) {
+            // 헤더가 "Bearer "로 시작하는지 확인
+            if (header.toLowerCase().startsWith(AuthConstants.TOKEN_TYPE.toLowerCase() + " ")) {
+                // "Bearer " 이후의 토큰을 반환
+                return header.substring(AuthConstants.TOKEN_TYPE.length() + 1); // "Bearer "의 길이 + 공백
+            } else {
+                throw new IllegalArgumentException("Invalid Authorization header format");
+            }
         }
+        throw new IllegalArgumentException("Authorization header is empty or null");
     }
 
     /**
@@ -52,16 +64,36 @@ public class TokenUtils {
      * @throws ExpiredJwtException, {@link JwtException} {@link NullPointerException}
      * */
     public static boolean isValidToken(String token){
+//        try {
+//            Claims claims = getClaimsFromToken(token);
+//            return true;
+//        } catch (ExpiredJwtException e){
+//            e.printStackTrace();
+//            return false;
+//        } catch (JwtException e){
+//            e.printStackTrace();
+//            return false;
+//        } catch (NullPointerException e){
+//            e.printStackTrace();
+//            return false;
+//        }
+        if (token == null || token.isEmpty()) {
+            System.out.println("토큰이 없어 없다구");
+            return false;
+        }
         try {
             Claims claims = getClaimsFromToken(token);
             return true;
-        } catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
+            System.out.println("토큰이 만료되었습니다.");
             e.printStackTrace();
             return false;
-        } catch (JwtException e){
+        } catch (JwtException e) {
+            System.out.println("유효하지 않은 토큰입니다.");
             e.printStackTrace();
             return false;
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
+            System.out.println("토큰이 존재하지 않는다고 한다 열받는다");
             e.printStackTrace();
             return false;
         }
@@ -133,6 +165,7 @@ public class TokenUtils {
         claims.put("memberName", member.getMemberName());
         claims.put("memberRole", member.getMemberRole());
         claims.put("memberEmail", member.getMemberEmail());
+        claims.put("memberNo", member.getMemberNo());
 
         return claims;
     }
