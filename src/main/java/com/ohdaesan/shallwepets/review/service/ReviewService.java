@@ -1,6 +1,8 @@
 package com.ohdaesan.shallwepets.review.service;
 
+import com.ohdaesan.shallwepets.images.domain.entity.Images;
 import com.ohdaesan.shallwepets.images.service.ImagesService;
+import com.ohdaesan.shallwepets.images.service.S3Service;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
@@ -20,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,7 +42,7 @@ public class ReviewService {
     private final ModelMapper modelMapper; // ModelMapper 주입
     private final PointRepository pointRepository;
     private final ReviewImagesRepository reviewImagesRepository;
-
+    private final S3Service s3Service;
     private final PointService pointService;
     private final ImagesService imagesService;
 
@@ -193,11 +197,36 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 리뷰수정
+    // 리뷰 수정
     @Transactional
-    public ReviewDTO updateReview(Long reviewNo, ReviewDTO reviewDTO) {
+    public ReviewDTO updateReview(Long reviewNo, ReviewDTO reviewDTO, List<Long> imagesToRemove) {
         Review existingReview = reviewRepository.findById(reviewNo)
                 .orElseThrow(() -> new EntityNotFoundException("리뷰가 존재하지 않습니다."));
+
+        Set<ReviewImages> reviewImages = existingReview.getReviewImages();
+
+        // 이미지 삭제
+        if (imagesToRemove != null && !imagesToRemove.isEmpty()) {
+            for (Long imageNo : imagesToRemove) {
+                Images image = imagesService.findImagesByImageNo(imageNo);
+
+//                reviewImagesRepository.deleteById(imageNo);
+                // 삭제하려는 이미지를 참조하는 reference 제거
+                imagesService.clearImageReferences(imageNo);
+
+                // S3에서 삭제
+                try {
+                    s3Service.deleteFile(image.getImageSavedName());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // DB에서도 삭제
+                imagesService.delete(imageNo);
+
+                reviewImages.removeIf(reviewImage -> reviewImage.getImage().getImageNo().equals(imageNo));
+            }
+        }
 
         // 수정된 내용으로 리뷰 빌드
         Review updatedReview = Review.builder()
@@ -208,6 +237,7 @@ public class ReviewService {
                 .content(reviewDTO.getContent())
                 .createdDate(existingReview.getCreatedDate())
                 .modifiedDate(LocalDateTime.now())
+                .reviewImages(reviewImages)
                 .build();
 
         // 업데이트 된 리뷰 저장
@@ -235,6 +265,11 @@ public class ReviewService {
         reviewImagesRepository.deleteAll(reviewImages);
 
         for (ReviewImages reviewImage : reviewImages) {
+            try {
+                s3Service.deleteFile(reviewImage.getImage().getImageSavedName());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             imagesService.delete(reviewImage.getImage().getImageNo());
         }
 
