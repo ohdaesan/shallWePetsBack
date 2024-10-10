@@ -14,6 +14,7 @@ public class BeanConfiguration {
 
         ModelMapper modelMapper = new ModelMapper();
 
+
         // enum Status를 String으로 바꿔서 리턴
         Converter<Status, String> statusToStringConverter = new Converter<Status, String>() {
             public String convert(MappingContext<Status, String> context) {

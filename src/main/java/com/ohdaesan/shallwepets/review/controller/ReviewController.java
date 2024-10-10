@@ -87,6 +87,10 @@ public class ReviewController {
         // 리뷰 목록 조회
         List<ReviewDTO> reviewList = reviewService.getReviewsByPostNo(postNo, sortOrder); // 정렬 기준 전달
 
+
+
+        // commit용
+
         // 리뷰 총 개수 계산
         int reviewCount = reviewList.size();
 
