@@ -38,20 +38,33 @@ public class TokenUtils {
      * @param header: Authorization의 header값을 가져온다.
      * @return token: Authorization의 token 부분을 반환한다.
      * */
-    public static String splitHeader(String header){
-//        if(!header.equals("")){
-//            return header.split(" ")[1];    // 'bearer' 제외한 토큰
-//        } else {
-//            return null;
+//    public static String splitHeader(String header){
+////        if(!header.equals("")){
+////            return header.split(" ")[1];    // 'bearer' 제외한 토큰
+////        } else {
+////            return null;
+////        }
+////         헤더가 null이 아니고 비어있지 않은지 확인
+//        if (header != null && !header.isEmpty()) {
+//            // 헤더가 "Bearer "로 시작하는지 확인
+//            if (header.toLowerCase().startsWith(AuthConstants.TOKEN_TYPE.toLowerCase() + " ")) {
+//                // "Bearer " 이후의 토큰을 반환
+//                return header.substring(AuthConstants.TOKEN_TYPE.length() + 1); // "Bearer "의 길이 + 공백
+//            } else {
+//                throw new IllegalArgumentException("Invalid Authorization header format");
+//            }
 //        }
-//         헤더가 null이 아니고 비어있지 않은지 확인
+//        throw new IllegalArgumentException("Authorization header is empty or null");
+//    }
+    public static String splitHeader(String header){
         if (header != null && !header.isEmpty()) {
-            // 헤더가 "Bearer "로 시작하는지 확인
-            if (header.toLowerCase().startsWith(AuthConstants.TOKEN_TYPE.toLowerCase() + " ")) {
-                // "Bearer " 이후의 토큰을 반환
-                return header.substring(AuthConstants.TOKEN_TYPE.length() + 1); // "Bearer "의 길이 + 공백
+            // "Bearer "가 두 번 중복되어 있으면 이를 제거
+            String cleanedHeader = header.replaceFirst("(?i)^Bearer\\sBearer\\s", "Bearer ");
+
+            if (cleanedHeader.toLowerCase().startsWith(AuthConstants.TOKEN_TYPE.toLowerCase() + " ")) {
+                return cleanedHeader.substring(AuthConstants.TOKEN_TYPE.length() + 1); // "Bearer " 이후의 토큰 반환
             } else {
-                throw new IllegalArgumentException("Invalid Authorization header format");
+                throw new IllegalArgumentException("Invalid Authorization header format: Bearer missing");
             }
         }
         throw new IllegalArgumentException("Authorization header is empty or null");
@@ -105,6 +118,7 @@ public class TokenUtils {
      * @return Claims
      * */
     public static Claims getClaimsFromToken(String token){
+        System.out.println("TokenUtil ======> GetClaimsFromToken : " + token);
         return Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(jwtSecretKey))   // 파싱을 통해 시크릿 키가 맞는지 확인
                 .parseClaimsJws(token).getBody();
     }
