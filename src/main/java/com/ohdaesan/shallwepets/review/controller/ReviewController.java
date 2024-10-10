@@ -4,6 +4,7 @@ import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.member.service.MemberService;
 import com.ohdaesan.shallwepets.post.service.PostService;
 import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewUpdateRequestDTO;
 import com.ohdaesan.shallwepets.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -123,8 +125,14 @@ public class ReviewController {
     @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "리뷰 수정", description = "리뷰 번호로 리뷰 수정")
     @PutMapping("/update/{reviewNo}")
-    public ResponseEntity<ResponseDTO> updateReview(@PathVariable Long reviewNo, @RequestBody ReviewDTO reviewDTO) {
-        ReviewDTO updatedReview = reviewService.updateReview(reviewNo, reviewDTO);
+    public ResponseEntity<ResponseDTO> updateReview(
+            @PathVariable Long reviewNo,
+            @RequestBody ReviewUpdateRequestDTO reviewUpdateRequestDTO){
+        ReviewDTO reviewDTO = reviewUpdateRequestDTO.getReviewDTO();
+        List<Long> imagesToRemove = reviewUpdateRequestDTO.getImagesToRemove();
+
+        ReviewDTO updatedReview = reviewService.updateReview(reviewNo, reviewDTO, imagesToRemove);
+
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("review", updatedReview);
 
