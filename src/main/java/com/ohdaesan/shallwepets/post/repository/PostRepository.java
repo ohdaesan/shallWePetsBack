@@ -2,6 +2,7 @@ package com.ohdaesan.shallwepets.post.repository;
 
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
+import com.ohdaesan.shallwepets.post.domain.entity.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -256,7 +257,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             String signguNm,
             String keyword,
             Pageable pageable);
-  
+
     @Query("SELECT DISTINCT p.signguNm FROM Post p WHERE p.ctyprvnNm LIKE CONCAT('%', :city, '%') AND p.ctgryTwoNm = :category")
     List<String> findDistinctSignguByCtyprvnNmContainsAndCtgryTwoNm(@Param("city") String city, @Param("category") String category);
 
@@ -273,4 +274,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByFcltyNmContaining(String searchTerm, Pageable pageable);
 
     Page<Post> findByFcltyNmContainingIgnoreCase(String searchTerm, Pageable pageable);
+
+
+    Page<Post> findByStatus(Status status, Pageable pageable);
+
+
+    List<Post> findByStatusNot(Status status);
+
 }
