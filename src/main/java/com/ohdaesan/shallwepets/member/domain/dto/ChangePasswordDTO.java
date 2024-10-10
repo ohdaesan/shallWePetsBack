@@ -1,4 +1,4 @@
-package com.ohdaesan.shallwepets.mypage.domain.dto;
+package com.ohdaesan.shallwepets.member.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,7 @@
 package com.ohdaesan.shallwepets.post.service;
 
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
+import com.ohdaesan.shallwepets.member.repository.MemberRepository;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
 import com.ohdaesan.shallwepets.post.domain.dto.PostSummaryDTO;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
@@ -29,6 +30,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final ReviewService reviewService;
     private final ModelMapper modelMapper;
+    private final MemberRepository memberRepository;
 
     public PostDTO getPostDetails(Long postNo) {
         Post post = postRepository.findById(postNo)
@@ -78,6 +80,14 @@ public class PostService {
 
         // Post 엔티티 저장
         postRepository.save(post);
+
+        // Member의 hasBusinessRegistered를 true로 업데이트
+        Member member = memberRepository.findByMemberNo(postDTO.getMemberNo());
+        if (member == null) {
+            throw new RuntimeException("Member not found");
+        }
+        member.setHasBusinessRegistered(true);
+        memberRepository.save(member); // 변경된 Member 저장
 
         // PostDTO 반환
         return modelMapper.map(post, PostDTO.class);

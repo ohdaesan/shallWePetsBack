@@ -50,6 +50,7 @@ public class Post {
     private String rdnmadrNm;
     private String lnmAddr;
     private String zipNo;
+    private String detailAddress;
     private String petPosblAt;
     private String entrnPosblPetSizeValue;
     private String petLmttMtrCn;
@@ -73,5 +74,8 @@ public class Post {
         postImage.setPost(null);
     }
 
+    public void setPostImage(List<PostImages> postImages) {
+        this.postImages = postImages; // postImages 필드에 값 설정
+    }
 }
 

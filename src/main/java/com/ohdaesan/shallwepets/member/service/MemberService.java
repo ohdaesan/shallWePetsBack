@@ -83,6 +83,7 @@ public class MemberService {
     }
 
     public void updatePassword(String memberId, String modifiedPw) {
+        log.info("비밀번호 업데이트 메서드 시작....");
         String encodedPassword = passwordEncoder.encode(modifiedPw);
         int updatedCount = memberRepository.updateMemberPwByMemberId(memberId, encodedPassword);
 
@@ -90,6 +91,7 @@ public class MemberService {
         if (updatedCount == 0) {
             throw new NoSuchElementException("존재하지 않는 회원입니다.");
         }
+
     }
 
     public boolean existsMemberId(String memberId) {

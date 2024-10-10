@@ -1,27 +1,52 @@
 package com.ohdaesan.shallwepets.member.service;
 
+import com.ohdaesan.shallwepets.global.ResponseDTO;
+import com.ohdaesan.shallwepets.images.domain.dto.ImagesDTO;
 import com.ohdaesan.shallwepets.images.domain.entity.Images;
+import com.ohdaesan.shallwepets.images.service.ImagesService;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
-import com.ohdaesan.shallwepets.mypage.domain.dto.ChangePasswordDTO;
+import com.ohdaesan.shallwepets.member.domain.dto.ChangePasswordDTO;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.domain.entity.PostImages;
+import com.ohdaesan.shallwepets.post.domain.entity.Status;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
+import com.ohdaesan.shallwepets.review.domain.dto.ExtendedReviewDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewImagesDTO;
+import com.ohdaesan.shallwepets.review.domain.entity.Review;
+import com.ohdaesan.shallwepets.review.domain.entity.ReviewImages;
+import com.ohdaesan.shallwepets.review.repository.ReviewImagesRepository;
+import com.ohdaesan.shallwepets.review.repository.ReviewRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +58,16 @@ public class MyPageService {
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg", "gif");
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private final PostRepository postRepository;
+    private final ImagesService imagesService;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final ReviewRepository reviewRepository;
+
+    private final ReviewImagesRepository reviewImagesRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(MyPageService.class);
+
 
     public MemberDTO getMemberInfo(Long memberNo) {
         Member member = memberRepository.findByMemberNo(memberNo);
@@ -125,10 +160,9 @@ public class MyPageService {
         Images image = member.getImage();
         if (image == null) {
             image = Images.builder()
-                    .imageOrigName(file.getOriginalFilename())  // 원본 파일명
-                    .imageSavedName(fileName)                   // 저장된 파일명
-//                    .imageSavedPath(filePath)                         // 저장된 파일 경로
-                    .imageUrl("/images/" + fileName)            // URL 경로 (이 부분은 나중에 실제 서비스에 맞게 변경)
+                    .imageOrigName(file.getOriginalFilename())       // 원본 파일명
+                    .imageSavedName(fileName)                        // 저장된 파일명
+                    .imageUrl("/images/" + fileName)                // URL 경로 (이 부분은 나중에 실제 서비스에 맞게 변경)
                     .build();
         } else {
             // 기존 이미지 엔티티가 있을 경우 업데이트
@@ -136,7 +170,6 @@ public class MyPageService {
                     .imageNo(image.getImageNo())
                     .imageOrigName(file.getOriginalFilename())
                     .imageSavedName(fileName)
-//                    .imageSavedPath(filePath)
                     .imageUrl("/images/" + fileName)  // URL 경로는 실제 서비스에 맞게 수정
                     .build();
         }
@@ -183,141 +216,173 @@ public class MyPageService {
 
     @Transactional
     public void changePassword(Long memberNo, ChangePasswordDTO changePasswordDTO) {
-        Member member = memberRepository.findByMemberNo(memberNo);
-        if (member == null) {
-            throw new NoSuchElementException("회원을 찾을 수 없습니다.");
+        Member member = memberRepository.findById(memberNo)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+
+        if (!passwordEncoder.matches(changePasswordDTO.getCurrentPassword(), member.getMemberPwd())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
         }
 
-        // 현재 비밀번호 확인
-        if (!member.getMemberPwd().equals(changePasswordDTO.getCurrentPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getConfirmNewPassword())) {
+            throw new IllegalArgumentException("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
         }
 
-        // 새 비밀번호 검증
-        String newPassword = changePasswordDTO.getNewPassword();
-        if (newPassword.length() < 8 || newPassword.length() > 20) {
-            throw new IllegalArgumentException("새 비밀번호는 8자 이상 20자 미만이어야 합니다.");
-        }
+        String encodedNewPassword = passwordEncoder.encode(changePasswordDTO.getNewPassword());
+        member.setMemberPwd(encodedNewPassword);
 
-        // 새 비밀번호와 확인 비밀번호가 일치하는지 확인
-        if (!newPassword.equals(changePasswordDTO.getConfirmNewPassword())) {
-            throw new IllegalArgumentException("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-        }
-
-        // 비밀번호 변경
-        Member updatedMember = Member.builder()
-                .memberId(member.getMemberId())
-                .memberPwd(newPassword) // 새로운 비밀번호 설정
-                .memberNickname(member.getMemberNickname())
-                .memberName(member.getMemberName())
-                .memberEmail(member.getMemberEmail())
-                .memberPhone(member.getMemberPhone())
-                .memberDob(member.getMemberDob())
-                .memberRoadAddress(member.getMemberRoadAddress())
-                .memberDetailAddress(member.getMemberDetailAddress())
-                .image(member.getImage())
-                .hasBusinessRegistered(member.isHasBusinessRegistered()) // 추가
-                .build();
-
-        memberRepository.save(updatedMember);
+        memberRepository.save(member);
     }
 
     // 여기서부터 post
 
-    @Transactional
-    public PostDTO registerBusiness(Long memberNo, PostDTO postDTO, List<MultipartFile> images) throws IOException {
-        Member member = memberRepository.findPostByMemberNo(memberNo)
-                .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
+//    //user의 업체 등록 신청
+//    @Transactional
+//    public PostDTO registerPost(PostDTO postDTO, List<MultipartFile> images, Long memberNo) throws IOException {
+//        // Set creation date
+//        postDTO.setCreatedDate(LocalDateTime.now());
+//
+//        // Set initial status
+//        postDTO.setStatus(String.valueOf(Status.AWAITING));
+//
+//        // Find member
+//        Member member = memberRepository.findById(memberNo)
+//                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+//
+//        // Map DTO to entity
+//        Post post = modelMapper.map(postDTO, Post.class);
+//        post.setMember(member);
+//
+//        // Save post
+//        Post savedPost = postRepository.save(post);
+//
+//        // Handle image uploads
+//        if (images != null && !images.isEmpty()) {
+//            for (MultipartFile image : images) {
+//                ImagesDTO imageDTO = new ImagesDTO();
+//                // 이미지 정보 설정 (파일 이름, 크기 등)
+//                imageDTO.setImageOrigName(image.getOriginalFilename());
+//                // 여기에 필요한 다른 이미지 정보 설정
+//
+//                Images savedImage = imagesService.save(imageDTO);
+//
+//                PostImages postImage = new PostImages();
+//                postImage.setPost(savedPost);
+//                postImage.setImage(savedImage);
+//                savedPost.addPostImage(postImage);
+//            }
+//        }
+//
+//        // Map saved entity back to DTO
+//        return modelMapper.map(savedPost, PostDTO.class);
+//
+//    }
 
-        if (images.size() > 10) {
-            throw new IllegalArgumentException("최대 10장의 이미지만 업로드할 수 있습니다.");
+
+//    public PostDTO getBusinessDetail(Long postNo, Long memberNo) {
+//        Post post = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
+//                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
+//        return modelMapper.map(post, PostDTO.class);
+//    }
+//
+//    @Transactional
+//    public PostDTO updateBusiness(Long postNo, Long memberNo, PostDTO updatedPostDTO, List<MultipartFile> newImages) throws IOException {
+//        Post existingPost = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
+//                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
+//
+//        // DTO를 기존 게시물에 매핑
+//        modelMapper.map(updatedPostDTO, existingPost);
+//
+//        if (newImages != null && !newImages.isEmpty()) {
+//            if (newImages.size() > 10) {
+//                throw new IllegalArgumentException("최대 10장의 이미지만 업로드할 수 있습니다.");
+//            }
+//
+//            // 기존 이미지 삭제
+//            deleteExistingImages(existingPost.getPostImages());
+//
+//            // 새 이미지 업로드
+//            List<Images> uploadedImages = uploadImages(newImages);
+//            List<PostImages> postImagesList = new ArrayList<>();
+//
+//            for (Images image : uploadedImages) {
+//                PostImages postImage = new PostImages();
+//                postImage.setPost(existingPost); // 현재 게시물 설정
+//                postImage.setImage(image); // 업로드된 이미지 설정
+//                postImagesList.add(postImage);
+//            }
+//
+//            existingPost.setPostImages(postImagesList); // 기존 게시물에 새 이미지 리스트 설정
+//        }
+//
+//        Post savedPost = postRepository.save(existingPost); // 업데이트된 게시물 저장
+//        return modelMapper.map(savedPost, PostDTO.class); // 저장된 게시물 DTO 반환
+//    }
+//
+//    private List<Images> uploadImages(List<MultipartFile> images) throws IOException {
+//        // 이미지 업로드 로직 구현
+//        // 실제 구현은 사용하는 스토리지 서비스에 따라 다를 수 있습니다.
+//        return null;
+//    }
+//
+//    private void deleteExistingImages(List<PostImages> images) {
+//        // 기존 이미지 삭제 로직 구현
+//        // 실제 구현은 사용하는 스토리지 서비스에 따라 다를 수 있습니다.
+//    }
+//
+//    @Transactional
+//    public void deleteBusiness(Long postNo, Long memberNo) {
+//        // 게시물과 회원 번호로 게시물을 조회
+//        Post post = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
+//                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
+//
+//        // 게시물 삭제
+//        postRepository.delete(post);
+//    }
+//
+//
+
+    // 내 리뷰 찾아오기
+
+
+    public List<ReviewDTO> getMemberReviewsByMemberNo(Long memberNo) {
+        Member member = memberRepository.findByMemberNo(memberNo);
+        if (member == null) {
+            throw new NoSuchElementException("회원을 찾을 수 없습니다.");
         }
-
-        Post post = modelMapper.map(postDTO, Post.class);
-        post.setMember(member);
-
-
-        List<Images> postImages = uploadImages(images);
-//        post.setImages(postImages);
-
-        Post savedPost = postRepository.save(post);
-
-        member.setHasBusinessRegistered(true);
-        memberRepository.save(member);
-
-        return modelMapper.map(savedPost, PostDTO.class);
-    }
-
-    public List<PostDTO> getMyBusinessList(Long memberNo) {
-        Member member = memberRepository.findPostByMemberNo(memberNo)
-                .orElseThrow(() -> new NoSuchElementException("회원을 찾을 수 없습니다."));
-
-        List<Post> posts = postRepository.findByMember(member);
-        return posts.stream()
-                .map(post -> modelMapper.map(post, PostDTO.class))
+        List<Review> reviews = reviewRepository.findByMember(member);
+        return reviews.stream()
+                .map(this::convertToExtendedReviewDTO)
                 .collect(Collectors.toList());
     }
 
-    public PostDTO getBusinessDetail(Long postNo, Long memberNo) {
-        Post post = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
-                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
-        return modelMapper.map(post, PostDTO.class);
+    private ReviewDTO convertToExtendedReviewDTO(Review review) {
+        // ModelMapper 명시적 매핑 설정
+        modelMapper.typeMap(Review.class, ReviewDTO.class)
+                .addMappings(mapper -> mapper.map(src -> src.getPost().getPostNo(), ReviewDTO::setPostNo));
+
+        // Review 엔티티를 ReviewDTO로 매핑
+        ReviewDTO reviewDTO = modelMapper.map(review, ReviewDTO.class);
+
+        // ExtendedReviewDTO 생성
+        ExtendedReviewDTO extendedReviewDTO = new ExtendedReviewDTO(reviewDTO);
+
+        // 리뷰 이미지 DTO 생성
+        List<ReviewImagesDTO> reviewImagesDTOs = review.getReviewImages().stream()
+                .map(this::convertToReviewImagesDTO)
+                .collect(Collectors.toList());
+        extendedReviewDTO.setReviewImages(reviewImagesDTOs);
+
+        return extendedReviewDTO;
     }
 
-    @Transactional
-    public PostDTO updateBusiness(Long postNo, Long memberNo, PostDTO updatedPostDTO, List<MultipartFile> newImages) throws IOException {
-        Post existingPost = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
-                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
-
-        // DTO를 기존 게시물에 매핑
-        modelMapper.map(updatedPostDTO, existingPost);
-
-        if (newImages != null && !newImages.isEmpty()) {
-            if (newImages.size() > 10) {
-                throw new IllegalArgumentException("최대 10장의 이미지만 업로드할 수 있습니다.");
-            }
-
-            // 기존 이미지 삭제
-            deleteExistingImages(existingPost.getPostImages());
-
-            // 새 이미지 업로드
-            List<Images> uploadedImages = uploadImages(newImages);
-            List<PostImages> postImagesList = new ArrayList<>();
-
-            for (Images image : uploadedImages) {
-                PostImages postImage = new PostImages();
-                postImage.setPost(existingPost); // 현재 게시물 설정
-                postImage.setImage(image); // 업로드된 이미지 설정
-                postImagesList.add(postImage);
-            }
-
-            existingPost.setPostImages(postImagesList); // 기존 게시물에 새 이미지 리스트 설정
-        }
-
-        Post savedPost = postRepository.save(existingPost); // 업데이트된 게시물 저장
-        return modelMapper.map(savedPost, PostDTO.class); // 저장된 게시물 DTO 반환
+    private ReviewImagesDTO convertToReviewImagesDTO(ReviewImages reviewImage) {
+        ReviewImagesDTO dto = new ReviewImagesDTO();
+        dto.setReviewImageNo(reviewImage.getReviewImageNo());
+        dto.setReviewNo(reviewImage.getReview().getReviewNo());
+        dto.setImageNo(reviewImage.getImage().getImageNo());
+        return dto;
     }
-
-    private List<Images> uploadImages(List<MultipartFile> images) throws IOException {
-        // 이미지 업로드 로직 구현
-        // 실제 구현은 사용하는 스토리지 서비스에 따라 다를 수 있습니다.
-        return null;
-    }
-
-    private void deleteExistingImages(List<PostImages> images) {
-        // 기존 이미지 삭제 로직 구현
-        // 실제 구현은 사용하는 스토리지 서비스에 따라 다를 수 있습니다.
-    }
-
-    @Transactional
-    public void deleteBusiness(Long postNo, Long memberNo) {
-        // 게시물과 회원 번호로 게시물을 조회
-        Post post = (Post) postRepository.findByPostNoAndMemberMemberNo(postNo, memberNo)
-                .orElseThrow(() -> new NoSuchElementException("해당 게시물을 찾을 수 없습니다."));
-
-        // 게시물 삭제
-        postRepository.delete(post);
-    }
-
-
 }
+
+
+

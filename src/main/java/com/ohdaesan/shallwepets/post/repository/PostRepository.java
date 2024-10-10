@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-//    List<Post> findByCtgryTwoNmAndCtyprvnNmContains(String ctgryTwoNm, String ctyprvnNm);
+    List<Post> findByCtgryTwoNmAndCtyprvnNmContains(String ctgryTwoNm, String ctyprvnNm);
 
     @Query("SELECT p FROM Post p " +
             "ORDER BY p.fcltyNm")

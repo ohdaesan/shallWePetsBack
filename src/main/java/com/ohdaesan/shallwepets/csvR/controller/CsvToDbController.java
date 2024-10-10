@@ -71,11 +71,10 @@ public class CsvToDbController {
                 dto.setPetLmttMtrCn(nextLine[23]);
                 dto.setInPlaceAcpPosblAt(nextLine[24]);
                 dto.setOutPlaceAcpPosblAt(nextLine[25]);
-                dto.setFcltyInfoDc(nextLine[26]);
                 dto.setPetAcpAditChrgeValue(nextLine[27]);
 
 
-//                System.out.println("dto:" + dto);
+                System.out.println("dto:" + dto);
 
                 // member_no 설정 부분
                 String memberNoStr = nextLine[28]; // CSV에서 member_no 가져오기

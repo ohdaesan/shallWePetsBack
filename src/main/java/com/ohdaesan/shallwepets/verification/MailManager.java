@@ -17,7 +17,7 @@ public class MailManager {
 
     public void send(String sendTo, String sub, String con) throws Exception {
         // HTML 태그 그대로 전송하는 방법
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+      MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         mimeMessage.setFrom(sender);
 
         // 받는 사람

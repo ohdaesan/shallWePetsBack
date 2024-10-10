@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -45,13 +46,13 @@ public class SMSService {
         }
     }
 
-    // 랜덤한 4자리 숫자 생성 메서드
-//    private String generateRandomNumber() {
-//        Random rand = new Random();
-//        StringBuilder numStr = new StringBuilder();
-//        for (int i = 0; i < 4; i++) {
-//            numStr.append(rand.nextInt(10));
-//        }
-//        return numStr.toString();
-//    }
+     // 랜덤한 4자리 숫자 생성 메서드
+    private String generateRandomNumber() {
+        Random rand = new Random();
+        StringBuilder numStr = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            numStr.append(rand.nextInt(10));
+        }
+        return numStr.toString();
+    }
 }

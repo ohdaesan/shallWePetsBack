@@ -2,14 +2,29 @@ package com.ohdaesan.shallwepets.member.controller;
 
 import com.ohdaesan.shallwepets.global.ResponseDTO;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
-import com.ohdaesan.shallwepets.mypage.domain.dto.ChangePasswordDTO;
+import com.ohdaesan.shallwepets.member.domain.dto.ChangePasswordDTO;
+import com.ohdaesan.shallwepets.member.domain.entity.Member;
+import com.ohdaesan.shallwepets.member.repository.MemberRepository;
+import com.ohdaesan.shallwepets.member.service.MemberService;
 import com.ohdaesan.shallwepets.member.service.MyPageService;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
+import com.ohdaesan.shallwepets.review.domain.dto.ReviewImagesDTO;
+import com.ohdaesan.shallwepets.review.domain.entity.Review;
+import com.ohdaesan.shallwepets.review.repository.ReviewRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +32,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Tag(name = "MyPage")
 @RestController
@@ -26,6 +43,11 @@ import java.util.Map;
 public class MyPageController {
 
     private final MyPageService myPageService;
+    private final MemberService memberService;
+    private final PasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
+    private final ReviewRepository reviewRepository;
+
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/my_info")
@@ -84,50 +106,92 @@ public class MyPageController {
         return ResponseEntity.ok().body(new ResponseDTO(200, message, response));
     }
 
-    @PostMapping("/change_password")
-    public ResponseEntity<ResponseDTO> changePassword(@RequestParam Long memberNo, @RequestBody ChangePasswordDTO changePasswordDTO) {
-        myPageService.changePassword(memberNo, changePasswordDTO);
-        return ResponseEntity.ok(new ResponseDTO(200, "비밀번호가 성공적으로 변경되었습니다.", null));
+    @PostMapping("/{memberNo}/change-password")
+    public ResponseEntity<String> changePassword(@PathVariable Long memberNo, @RequestBody ChangePasswordDTO passwordData) {
+        try {
+            // 회원 정보 조회
+            Member member = memberService.findById(memberNo);
+
+            // 로그 출력
+            log.info("Current Password: {}", passwordData.getCurrentPassword());
+            log.info("Encoded Password from DB: {}", member.getMemberPwd());
+
+            // 현재 비밀번호 확인
+            if (!passwordEncoder.matches(passwordData.getCurrentPassword(), member.getMemberPwd())) {
+                log.info("기존 비밀번호와 입력된 비밀번호가 일치하지 않음..");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("현재 비밀번호가 일치하지 않습니다.");
+            }
+
+            // 새 비밀번호 변경
+            myPageService.changePassword(memberNo, passwordData);
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원을 찾을 수 없습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 변경 중 오류가 발생했습니다.");
+        }
     }
 
 
     // 여기서부터 post
 
-    @PostMapping("/businessregister")
-    public ResponseEntity<PostDTO> registerBusiness(
-            @RequestPart("postDTO") PostDTO postDTO,
-            @RequestPart("images") List<MultipartFile> images,
-            @RequestParam("memberNo") Long memberNo) throws IOException {
-        PostDTO registeredPost = myPageService.registerBusiness(memberNo, postDTO, images);
-        return ResponseEntity.ok(registeredPost);
-    }
 
-    @GetMapping("/mybusinesslist")
-    public ResponseEntity<List<PostDTO>> getMyBusinessList(@RequestParam("memberNo") Long memberNo) {
-        List<PostDTO> postList = myPageService.getMyBusinessList(memberNo);
-        return ResponseEntity.ok(postList);
-    }
+//    // 업체 등록
+//    @Operation(summary = "업체 등록", description = "사용자가 입력한 정보를 이용하여 업체 등록")
+//    @PostMapping("/businessregister")
+//    public ResponseEntity<ResponseDTO> registerPost(
+//            @RequestParam Map<String, String> postDTO,
+//            @RequestParam("memberNo") Long memberNo,
+//            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+//        try {
+//            PostDTO postDTOObj = new PostDTO();
+//            // Map the received parameters to PostDTO object
+//            BeanUtils.copyProperties(postDTO, postDTOObj);
+//
+//            PostDTO registeredPost = myPageService.registerPost(postDTOObj, images, memberNo);
+//            return ResponseEntity.ok()
+//                    .body(new ResponseDTO(HttpStatus.CREATED.value(), "업체 등록 신청 성공", registeredPost));
+//        } catch (Exception e) {
+//            // Error handling (unchanged)
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 오류가 발생했습니다", null));
+//        }
+//    }
 
-    @GetMapping("/mybusinesslist/{postNo}")
-    public ResponseEntity<PostDTO> getBusinessDetail(@PathVariable Long postNo, @RequestParam("memberNo") Long memberNo) {
-        PostDTO post = myPageService.getBusinessDetail(postNo, memberNo);
-        return ResponseEntity.ok(post);
-    }
 
-    @PutMapping("/mybusinesslist/{postNo}")
-    public ResponseEntity<PostDTO> updateBusiness(
-            @PathVariable Long postNo,
-            @RequestParam("memberNo") Long memberNo,
-            @RequestPart("postDTO") PostDTO postDTO,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
-        PostDTO updatedPost = myPageService.updateBusiness(postNo, memberNo, postDTO, images);
-        return ResponseEntity.ok(updatedPost);
-    }
+//    @GetMapping("/mybusinesslist/{postNo}")
+//    public ResponseEntity<PostDTO> getBusinessDetail(@PathVariable Long postNo, @RequestParam("memberNo") Long memberNo) {
+//        PostDTO post = myPageService.getBusinessDetail(postNo, memberNo);
+//        return ResponseEntity.ok(post);
+//    }
+//
+//    @PutMapping("/mybusinesslist/{postNo}")
+//    public ResponseEntity<PostDTO> updateBusiness(
+//            @PathVariable Long postNo,
+//            @RequestParam("memberNo") Long memberNo,
+//            @RequestPart("postDTO") PostDTO postDTO,
+//            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
+//        PostDTO updatedPost = myPageService.updateBusiness(postNo, memberNo, postDTO, images);
+//        return ResponseEntity.ok(updatedPost);
+//    }
+//
+//    @DeleteMapping("/mybusinesslist/{postNo}")
+//    public ResponseEntity<Void> deleteBusiness(@PathVariable Long postNo, @RequestParam("memberNo") Long memberNo) {
+//        myPageService.deleteBusiness(postNo, memberNo);
+//        return ResponseEntity.noContent().build();  // 삭제 성공 시 204 No Content 응답
+//    }
 
-    @DeleteMapping("/mybusinesslist/{postNo}")
-    public ResponseEntity<Void> deleteBusiness(@PathVariable Long postNo, @RequestParam("memberNo") Long memberNo) {
-        myPageService.deleteBusiness(postNo, memberNo);
-        return ResponseEntity.noContent().build();  // 삭제 성공 시 204 No Content 응답
+
+    // 여기서부턴 내 리뷰
+
+    // MemberNo로 리뷰 조회
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping("/myreviewlist")
+    public ResponseEntity<ResponseDTO> getMemberReviews(@RequestParam Long memberNo) {
+        List<ReviewDTO> reviews = myPageService.getMemberReviewsByMemberNo(memberNo);
+        return ResponseEntity.ok().body(new ResponseDTO(200, "회원 리뷰 목록 조회 성공", reviews));
     }
 
 }
+
+
