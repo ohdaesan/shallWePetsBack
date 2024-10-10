@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class ChattingRoomService {
+
+
     private final ChattingRoomRepository chattingRoomRepository;
     private final MessageService messageService;
     private final MemberService memberService;
@@ -62,4 +64,37 @@ public class ChattingRoomService {
                 .collect(Collectors.toList());
     }
 
+    // 채팅방 하나만 불러오도록 생성
+    // 기존 채팅방 찾기 또는 새 채팅방 생성
+    public Long createOrFindChatRoom(Long memberNo, Long member2No) {
+        // 1. 이미 존재하는 채팅방을 찾는다.
+        List<ChattingRoomEntity> existingRoom = chattingRoomRepository.findByMember1_IdAndMember2_Id(memberNo, member2No);
+
+
+
+        if (!existingRoom.isEmpty()) {
+            // 채팅방이 이미 존재할 경우 그 채팅방을 반환
+            return existingRoom.get(0).getChattingRoomNo();
+        }
+
+        // 2. 존재하지 않는다면 새로운 채팅방을 생성한다.
+        Member member1 = memberService.findById(memberNo); // 첫 번째 멤버 조회
+        Member member2 = memberService.findById(member2No); // 두 번째 멤버 조회
+
+        ChattingRoomEntity newRoom = ChattingRoomEntity.builder()
+                .member1(member1)
+                .member2(member2)
+                .status(ChattingRoomEntity.RoomStatus.ACTIVE)
+                .createdDate(LocalDateTime.now())
+                .build();
+
+        ChattingRoomEntity savedChattingRoom = chattingRoomRepository.save(newRoom);
+
+        return savedChattingRoom.getChattingRoomNo();
+    }
+
+    // 채팅방 리스트 전체 조회하기 위해 만듦
+    public List<ChattingRoomEntity> findAllChatRooms() {
+        return chattingRoomRepository.findAll();
+    }
 }
