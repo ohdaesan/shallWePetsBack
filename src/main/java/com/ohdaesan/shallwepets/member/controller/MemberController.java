@@ -210,7 +210,7 @@ public class MemberController {
         return ResponseEntity.ok().body(new ResponseDTO(200, "email과 전화번호 이용한 멤버 존재 여부 확인 성공", response));
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "포인트 회원 정보 조회", description = "전체 회원 정보 조회")
     @GetMapping("/memberList")
     public ResponseEntity<ResponseDTO> searchMemberList() {

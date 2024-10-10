@@ -217,7 +217,7 @@ public class PostController {
     // 관리자의 폼 수정[반려 or 승인](상태 변경+ 반려사유)
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "업체 상태 수정", description = "업체 상태 수정")
-    @PutMapping("/{postNo}")
+    @PutMapping("/update/{postNo}")
     public ResponseEntity<ResponseDTO> updatePostStatus(@PathVariable Long postNo, @RequestBody PostDTO postDTO) {
         PostDTO updatedPost = postService.updatePostStatus(postNo, postDTO);
         Map<String, Object> responseMap = new HashMap<>();
@@ -228,7 +228,9 @@ public class PostController {
     }
 
 
+
     // 신청자의 반려당한 이후 폼 수정
+    @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "반려된 폼 수정", description = "반려된 폼 수정")
     @PutMapping("/rePost/{postNo}")
     public ResponseEntity<ResponseDTO> updatePostForm(@PathVariable Long postNo, @RequestBody PostDTO postDTO) {
@@ -250,6 +252,38 @@ public class PostController {
 
         return ResponseEntity.ok()
                 .body(new ResponseDTO(200, "post 전체 조회 성공", responseMap));
+    }
+
+
+    // 승인 신청 리스트 조회
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @Operation(summary = "post 조건 조회", description = "status가 APPROVED가 아닌 것들")
+    @GetMapping("/getPostAwaitingList")
+    public ResponseEntity<ResponseDTO> getPostAwaitingList() {
+        // 서비스 호출
+        List<PostDTO> postList = postService.getPostAwaitingList();
+
+        // 응답 생성
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("postList", postList);
+
+        return ResponseEntity.ok()
+                .body(new ResponseDTO(200, "status가 APPROVED가 아닌 post 목록 조회 성공", responseMap));
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @Operation(summary = "post 삭제", description = "삭제")
+    @DeleteMapping("/delete/{postNo}")
+    public ResponseEntity<ResponseDTO> deletePost(@PathVariable Long postNo) {
+        // 서비스 호출하여 게시글 삭제
+        Long deletedPostNo = postService.deletePost(postNo);
+
+        // 응답 생성
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("deletedPostNo", deletedPostNo); // 삭제된 게시글 ID를 results에 포함
+
+        return ResponseEntity.ok()
+                .body(new ResponseDTO(200, "게시글이 성공적으로 삭제되었습니다.", responseMap));
     }
 
 
