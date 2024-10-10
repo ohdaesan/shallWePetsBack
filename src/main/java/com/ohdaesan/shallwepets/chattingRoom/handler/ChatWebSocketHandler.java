@@ -58,9 +58,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         //                          (session.getUri()); 에서 수정
         System.out.println("추출된 토큰:" + token); // 토큰이 잘 추출되는지 확인하기 위한 로그
 
+        String[] splitToken = token.split(" ");
 
 
-        if (token == null || !TokenUtils.isValidToken(token)) {
+        if (token == null || !TokenUtils.isValidToken(splitToken[1])) {
             session.close(CloseStatus.POLICY_VIOLATION.withReason("토큰이 없습니다"));
             return;
         }
@@ -76,7 +77,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 //        }
         Long memberNo = null;
         try {
-            Claims claims = TokenUtils.getClaimsFromToken(token);
+            Claims claims = TokenUtils.getClaimsFromToken(splitToken[1]);
             memberNo = claims.get("memberNo", Long.class);
             System.out.println("추출된 memberNo: " + memberNo);
 
