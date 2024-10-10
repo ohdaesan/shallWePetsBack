@@ -269,7 +269,6 @@ public class ImagesController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @Operation(summary = "포스트 번호로 업체가 직접 등록한 이미지들 가져오기", description = "포스트 번호로 업체가 직접 등록한 이미지들 가져오기")
     @PostMapping("/getPostImagesByPostNo")
     public ResponseEntity<ResponseDTO> getPostImagesByPostNo(@RequestBody Map<String, String> params) {
