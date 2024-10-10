@@ -65,6 +65,25 @@ public class PostController {
 //                .body(new ResponseDTO(200, "포스트 리스트 조회 성공", responseMap));
 //    }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @Operation(summary = "장소 리스트 모든 status 페이징 처리하여 조회", description = "포스트 리스트 모든 status 페이징 처리해서 불러오기")
+    @GetMapping("/getListAdmin")
+    public ResponseEntity<ResponseDTO> getPostsByCategoryAndCitiesAdmin(
+            @RequestParam int page) {
+        List<Post> posts = postService.getAllPostsAdmin(page);
+
+        List<PostDTO> postDTOs = posts.stream()
+                .map(post -> modelMapper.map(post, PostDTO.class))
+                .collect(Collectors.toList());
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("posts", postDTOs);
+
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO(200, "포스트 리스트 조회 성공", responseMap));
+    }
+
     @Operation(summary = "장소 리스트 페이징 처리하여 조회", description = "특정 카테고리와 도시로 포스트 리스트 페이징 처리해서 불러오기")
     @GetMapping("/getList")
     public ResponseEntity<ResponseDTO> getPostsByCategoryAndCities(

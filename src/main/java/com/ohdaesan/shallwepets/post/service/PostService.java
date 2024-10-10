@@ -431,6 +431,16 @@ public class PostService {
     }
 
 
+    public List<Post> getAllPostsAdmin(int pageNo) {
+        Page<Post> page = null;
 
+        PageRequest pageRequest = PageRequest.of(pageNo, 10);
 
+        page = postRepository.findAllPostsAdmin(pageRequest);
+
+        assert page != null;
+        List<Post> posts = page.getContent();
+
+        return posts;
+    }
 }
