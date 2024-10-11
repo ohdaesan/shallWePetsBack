@@ -132,6 +132,12 @@ public class MyPageController {
         }
     }
 
+    @DeleteMapping("/deleteaccount/{memberNo}")
+    public ResponseEntity<Void> deleteMember(@PathVariable Long memberNo) {
+        myPageService.deleteMember(memberNo);
+        return ResponseEntity.ok().build();
+    }
+
 
     // 여기서부터 post
 
