@@ -101,6 +101,9 @@ public class MyPageService {
         if (updatedMemberDTO.getMemberPhone() != null) {
             existingMember.setMemberPhone(updatedMemberDTO.getMemberPhone());
         }
+        if (updatedMemberDTO.getMemberZipcode() != null) {
+            existingMember.setMemberZipcode(updatedMemberDTO.getMemberZipcode());
+        }
         if (updatedMemberDTO.getMemberDob() != null) {
             existingMember.setMemberDob(updatedMemberDTO.getMemberDob());
         }
@@ -183,6 +186,7 @@ public class MyPageService {
                 .memberEmail(member.getMemberEmail())
                 .memberPhone(member.getMemberPhone())
                 .memberDob(member.getMemberDob())
+                .memberZipcode(member.getMemberZipcode())
                 .memberRoadAddress(member.getMemberRoadAddress())
                 .memberDetailAddress(member.getMemberDetailAddress())
                 .image(image)  // 이미지 엔티티 설정
