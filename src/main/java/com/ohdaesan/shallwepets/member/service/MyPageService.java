@@ -6,12 +6,12 @@ import com.ohdaesan.shallwepets.images.domain.entity.Images;
 import com.ohdaesan.shallwepets.images.service.ImagesService;
 import com.ohdaesan.shallwepets.member.domain.dto.MemberDTO;
 import com.ohdaesan.shallwepets.member.domain.entity.Member;
+import com.ohdaesan.shallwepets.member.domain.entity.Status;
 import com.ohdaesan.shallwepets.member.repository.MemberRepository;
 import com.ohdaesan.shallwepets.member.domain.dto.ChangePasswordDTO;
 import com.ohdaesan.shallwepets.post.domain.dto.PostDTO;
 import com.ohdaesan.shallwepets.post.domain.entity.Post;
 import com.ohdaesan.shallwepets.post.domain.entity.PostImages;
-import com.ohdaesan.shallwepets.post.domain.entity.Status;
 import com.ohdaesan.shallwepets.post.repository.PostRepository;
 import com.ohdaesan.shallwepets.review.domain.dto.ExtendedReviewDTO;
 import com.ohdaesan.shallwepets.review.domain.dto.ReviewDTO;
@@ -235,6 +235,17 @@ public class MyPageService {
         member.setMemberPwd(encodedNewPassword);
 
         memberRepository.save(member);
+    }
+
+    @Transactional
+    public void deleteMember(Long memberNo) {
+        Member existingMember = memberRepository.findByMemberNo(memberNo);
+        if (existingMember == null) {
+            throw new NoSuchElementException("회원을 찾을 수 없습니다.");
+        }
+
+        existingMember.setStatus(Status.DELETED);
+        memberRepository.save(existingMember);
     }
 
     // 여기서부터 post
